@@ -1,0 +1,10 @@
+syntax: glob
+Artwork/*
+Artwork/**/*
+scripts/**
+tests/**
+.config/logs/**
+.config/**
+
+syntax: regexp
+flex/generated/
