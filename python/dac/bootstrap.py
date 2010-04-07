@@ -166,7 +166,7 @@ class RunServerOptions(BaseUsageOptions):
 
 class ServiceOptions(BaseUsageOptions):
     optParameters = [
-        ("config", "c", "~/.ilog", "Configuration directory"),
+        ("config", "c", "~/.dac", "Configuration directory"),
     ]
 
     subCommands = [
