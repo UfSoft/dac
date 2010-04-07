@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+global {
+  fontSize: 12;
+  fontFamily: Tahoma;
+}
+
+Application {
+  paddingTop: 10;
+  paddingRight: 10;
+  paddingBottom: 10;
+  paddingLeft: 10;
+  horizontalGap: 10;
+  verticalGap: 10;
+}
+
+ApplicationControlBar {
+  background-color: #22323c;
+  color: #ffffff;
+}
+.applicationControlBarLabel {
+  letterSpacing: 1;
+  color: #ffffff;
+  fontSize: 14;
+}
+
+Panel {
+  margin: 5;
+  paddingTop: 0;
+  paddingRight: 0;
+  paddingBottom: 0;
+  paddingLeft: 0;
+  borderColor: #22323c;
+  borderAlpha: 0.9;
+  titleStyleName: "panelTitle";
+}
+
+.panelTitle {
+  letterSpacing: 2;
+  color: #ffffff;
+  fontFamily: Tahoma;
+  fontSize: 14;
+}
+
+DownloadButton {
+  width: 30px;
+  height: 30px;
+  icon: Embed('disk.png');
+  disabledIcon: Embed('disk-grey.png');
+}
+
+
+
+

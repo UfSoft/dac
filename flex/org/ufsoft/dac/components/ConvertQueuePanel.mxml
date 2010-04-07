@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+          layout="vertical"
+          width="100%"
+          height="50%"
+          title="Conversion Queue"
+          creationComplete="creationComplete()">
+
+  <mx:ChannelSet id="localChannelSet">
+    <!--  <mx:AMFChannel url="/services"/> -->
+    <mx:StreamingAMFChannel url="/services"/>
+  </mx:ChannelSet>
+
+  <mx:Script>
+  <![CDATA[
+
+    import net.zengrong.logging.Firebug;
+    import mx.messaging.events.MessageEvent;
+    import mx.collections.ArrayCollection;
+
+    import org.ufsoft.dac.conversions.Conversion;
+
+    [Bindable]
+    private var conversions:ArrayCollection = new ArrayCollection();
+
+
+    private function fullQueueMessageHandler(event:MessageEvent):void
+    {
+      //items.addItem(event.message.body);
+      Firebug.debug(1, String(event));
+
+      conversions = event.message.body as ArrayCollection;
+    }
+
+    private function queueItemAddedMessageHandler(event:MessageEvent):void
+    {
+      Firebug.debug(1, String(event.message.body));
+      conversions.addItem(event.message.body as Conversion);
+    }
+
+    private function conversionProgressUpdateMessageHandler(event:MessageEvent):void
+    {
+      Firebug.debug(1, String(event.message.body));
+      var conversion:Conversion = event.message.body as Conversion;
+
+      for each (var c:Conversion in conversions) {
+        if (event.message.body.id == c.id) {
+          c.progress = event.message.body.progress;
+          conversions.itemUpdated(c);
+        }
+      }
+      /*var conversion_index:uint = conversions.getItemIndex(conversion);
+      conversions.getItemAt(conversion_index).progress = conversion.progress;
+      conversions.itemUpdated(conversion);*/
+    }
+
+    private function creationComplete():void {
+      fullQueueConsumer.subscribe();
+      queueItemAddedConsumer.subscribe();
+      conversionProgressUpdateConsumer.subscribe();
+    }
+
+  ]]>
+  </mx:Script>
+
+  <mx:Consumer id="fullQueueConsumer"
+               channelSet="{localChannelSet}"
+               destination="messages"
+               subtopic="queue"
+               resubscribeAttempts="5"
+               resubscribeInterval="5000"
+               message="fullQueueMessageHandler(event)">
+  </mx:Consumer>
+
+  <mx:Consumer id="queueItemAddedConsumer"
+               channelSet="{localChannelSet}"
+               destination="messages"
+               subtopic="queueItemAdded"
+               resubscribeAttempts="5"
+               resubscribeInterval="5000"
+               message="queueItemAddedMessageHandler(event)">
+  </mx:Consumer>
+
+  <mx:Consumer id="conversionProgressUpdateConsumer"
+               channelSet="{localChannelSet}"
+               destination="messages"
+               subtopic="conversionProgressUpdate"
+               resubscribeAttempts="5"
+               resubscribeInterval="5000"
+               message="conversionProgressUpdateMessageHandler(event)">
+  </mx:Consumer>
+
+  <mx:DataGrid id="conversionsDG" width="100%" height="100%" dataProvider="{conversions}">
+    <mx:columns>
+      <mx:DataGridColumn dataField="id" visible="false"/>
+      <mx:DataGridColumn dataField="filename" headerText="Original Filename"/>
+      <mx:DataGridColumn dataField="progress" headerText="Progress" width="150"
+                         itemRenderer="org.ufsoft.dac.renderers.DataGridProgress"/>
+      <mx:DataGridColumn dataField="url" headerText="Download" width="100"
+                         itemRenderer="org.ufsoft.dac.renderers.DownloadButton"/>
+    </mx:columns>
+  </mx:DataGrid>
+</mx:Panel>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mySimpleBuild.xml -->
+<project name="My App Builder" basedir="." default="main">
+  <property name="FLEX_HOME" value="/opt/Adobe/SDKs/Flex/3.2.0"/>
+  <property name="APP_ROOT" value="./"/>
+  <property name="DEPLOY_DIR" value="${APP_ROOT}/python/dac/shared"/>
+  <property name="asdoc" value="${FLEX_HOME}bin/asdoc"/>
+
+  <taskdef resource="flexTasks.tasks"
+           classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+    <target name="main">
+        <mxmlc file="${APP_ROOT}/flex/Main.mxml"
+               output="${DEPLOY_DIR}/Main.swf"
+               actionscript-file-encoding="UTF-8"
+               keep-generated-actionscript="true"
+               incremental="true">
+            <load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
+            <source-path path-element="${FLEX_HOME}/frameworks"/>
+            <compiler.library-path dir="${APP_ROOT}/flex/lib" append="true">
+              <include name="FlexSpy.swc"/>
+            </compiler.library-path>
+        </mxmlc>
+    </target>
+  <target name="wrapper">
+          <html-wrapper
+              title="Dalet Pre Conversion"
+              file="index.html"
+              height="100%"
+              width="100%"
+              bgcolor="red"
+              application="app"
+              swf="Main"
+              version-major="9"
+              version-minor="0"
+              version-revision="0"
+              history="true"
+              template="express-installation"
+              output="${DEPLOY_DIR}"/>
+      </target>
+      <target name="clean">
+          <delete>
+             <fileset dir="${DEPLOY_DIR}" includes="Main.swf"/>
+              <!-- Deletes playerProductInstall.swf -->
+              <fileset dir="${APP_ROOT}/python/dac/shared"
+                  includes="playerProductInstall.swf"
+                  defaultexcludes="false"/>
+              <!-- Deletes index.html and historyFrame.html -->
+              <fileset dir="${APP_ROOT}" includes="*.html" defaultexcludes="false"/>
+              <!-- Deletes history.css -->
+              <fileset dir="${APP_ROOT}" includes="*.css" defaultexcludes="false"/>
+              <!-- Deletes history.js and AC_OETags.js -->
+              <fileset dir="${APP_ROOT}" includes="*.js" defaultexcludes="false"/>
+          </delete>
+      </target>
+
+</project>

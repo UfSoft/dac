@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:components="org.ufsoft.dac.components.*"
+                layout="vertical"
+                scriptRecursionLimit="1000"
+                scriptTimeLimit="60"
+                usePreloader="true"
+                pageTitle="Audio Convert"
+                frameRate="7"
+                width="95%"
+                height="95%"
+                themeColor="haloBlue">
+  <mx:Style source="assets/style.css" />
+
+  <mx:Script source="Main_script.as"/>
+
+  <mx:ChannelSet id="localChannelSet">
+    <mx:AMFChannel url="/services"/>
+  </mx:ChannelSet>
+
+  <mx:Script>
+  <![CDATA[
+
+    import net.zengrong.logging.Firebug;
+    import mx.messaging.events.MessageEvent;
+
+    [Bindable]
+    [Embed('assets/rtp.png')]
+    private var rtpLogo:Class;
+
+    private function messageHandler(event:MessageEvent):void
+    {
+      //items.addItem(event.message.body);
+      Firebug.debug(event);
+    }
+
+  ]]>
+  </mx:Script>
+  <mx:Consumer id="regularConsumer"
+               channelSet="{localChannelSet}"
+               destination="messages"
+               resubscribeAttempts="5"
+               resubscribeInterval="5000"
+               message="messageHandler(event)">
+  </mx:Consumer>
+
+  <mx:ApplicationControlBar width="100%">
+    <mx:Image source="{rtpLogo}"/>
+    <mx:Label text="Audio Converter by Pedro Algarvio for Rádio e Televisão de Portugal"
+              styleName="applicationControlBarLabel"/>
+    <mx:Spacer width="100%"/>
+    <mx:Button id="btnFlexSpy" label="FlexSpy" click="FlexSpy.show()"/>
+  </mx:ApplicationControlBar>
+
+  <mx:HDividedBox id="mainContent" width="100%" height="100%">
+    <components:FileUploadsPanel width="40%" height="100%" title="Uploads Queue"/>
+    <components:ConvertQueuePanel width="60%" height="100%"/>
+  </mx:HDividedBox>
+</mx:Application>
