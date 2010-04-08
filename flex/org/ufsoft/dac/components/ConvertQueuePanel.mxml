@@ -49,9 +49,6 @@
           conversions.itemUpdated(c);
         }
       }
-      /*var conversion_index:uint = conversions.getItemIndex(conversion);
-      conversions.getItemAt(conversion_index).progress = conversion.progress;
-      conversions.itemUpdated(conversion);*/
     }
 
     private function creationComplete():void {

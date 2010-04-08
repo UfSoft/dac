@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:UploadsPanelClass xmlns:mx="http://www.adobe.com/2006/mxml"
+                              xmlns:components="org.ufsoft.dac.components.uploads.*"
+                              layout="vertical">
+  <mx:Script>
+  <![CDATA[
+
+  ]]>
+  </mx:Script>
+  <mx:VBox width="100%" id="fileContainer">
+    <mx:VBox id="fileUploadBox" maxHeight="250" width="100%" label="Files to Upload"/>
+  </mx:VBox>
+  <mx:ControlBar>
+    <mx:VBox>
+      <mx:HBox id="uploadStats" width="100%" visible="false">
+        <mx:Text text="Total Files:" /><mx:Text id="totalFiles" />
+        <mx:Text text="Total Size:" /><mx:Text id="totalSize" />
+      </mx:HBox>
+      <mx:ProgressBar id="totalProgressBar" width="100%" mode="manual" visible="false" />
+      <mx:HBox>
+        <mx:Button id="browseButton" label="Add Files" width="100"  />
+        <mx:Button id="clearButton" label="Clear Files" visible="false" width="100"  />
+        <mx:Button id="uploadButton" label="Upload Files" visible="false" width="100" />
+        <mx:Button id="cancelButton" label="Cancel Upload" visible="false" width="100" />
+      </mx:HBox>
+      <mx:Text id="mytext" />
+    </mx:VBox>
+  </mx:ControlBar>
+</components:UploadsPanelClass>

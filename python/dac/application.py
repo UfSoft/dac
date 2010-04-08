@@ -10,6 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import gst
+import shutil
 import amfast
 import logging
 from ConfigParser import SafeConfigParser
@@ -86,15 +87,14 @@ class Conversion(object):
         if state is not gst.STATE_NULL:
             self.pipeline.set_state(gst.STATE_NULL)
         self.processing = False
+        log.debug("Removing uploaded file: %s", self.filename)
+        shutil.rmtree(self.in_filepath, ignore_errors=True)
 
     def on_message(self, bus, message):
         if message.structure and message.structure.get_name() == 'progress':
             progress = message.structure['percent-double']
             log.debug("converted %d%% of %s", progress, self)
             self.set_progress(progress)
-            if progress >= 100.0:
-                self.converted = True
-                self.stop()
 
     def on_eos_message(self, bus, message):
         self.set_progress(100.0)
