@@ -16,7 +16,7 @@ import logging
 from ConfigParser import SafeConfigParser
 from os.path import abspath, basename, dirname, expanduser, isdir, join
 from types import ModuleType
-from os import makedirs, listdir
+from os import makedirs, listdir, remove
 from os.path import basename, dirname, join, splitext
 
 from twisted.web import static, server, resource, vhost
@@ -88,7 +88,7 @@ class Conversion(object):
             self.pipeline.set_state(gst.STATE_NULL)
         self.processing = False
         log.debug("Removing uploaded file: %s", self.filename)
-        shutil.rmtree(self.in_filepath, ignore_errors=True)
+        remove(self.in_filepath)
 
     def on_message(self, bus, message):
         if message.structure and message.structure.get_name() == 'progress':
