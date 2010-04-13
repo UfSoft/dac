@@ -11,6 +11,7 @@ package org.ufsoft.dac.components.uploads
   import flash.net.FileReferenceList;
   import flash.net.FileFilter;
   import flash.external.*;
+  import flash.utils.*
   import mx.events.FlexEvent;
   import flash.events.*;
   import flash.net.URLRequest;
@@ -151,10 +152,10 @@ package org.ufsoft.dac.components.uploads
       {
         OnCancelClicked(null);
         // get the javascript complete funtion to call
-        var completeFunction:String = Application.application.parameters.completeFunction;
+        /*var completeFunction:String = Application.application.parameters.completeFunction;
         // if a complete function is passed in, set in flashvars
         if(completeFunction != null && completeFunction != "")
-          navigateToURL(new URLRequest("javascript:"+completeFunction),"_self");
+          navigateToURL(new URLRequest("javascript:"+completeFunction),"_self");*/
       }
     }
 
@@ -221,7 +222,7 @@ package org.ufsoft.dac.components.uploads
     // fired when a file has finished uploading
     private function OnFileUploadComplete(event:FileUploadEvent):void{
       _currentUpload == null;
-      OnUploadFilesClicked(null);
+      setTimeout(OnUploadFilesClicked, 10, null);
     }
 
     private function OnTotalFileSizeLimitReached():void{

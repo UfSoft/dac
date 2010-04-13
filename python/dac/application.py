@@ -37,11 +37,11 @@ class Conversion(object):
     def __init__(self, filename):
         self.id = id(self)
         self.filename = filename
+        self.out_filename = "%s.mp2" % splitext(filename)[0]
         self.progress = 0
         self.processing = False
         self.converted = False
         self.in_filepath = join(app.config.uploads_dir, filename)
-        filename, ext = splitext(filename)
         self.out_filepath = join(app.config.downloads_dir, "%s.mp2" % filename)
         self.url = '/downloads/%s' % basename(self.out_filepath)
 
@@ -93,17 +93,18 @@ class Conversion(object):
     def on_message(self, bus, message):
         if message.structure and message.structure.get_name() == 'progress':
             progress = message.structure['percent-double']
-            log.debug("converted %d%% of %s", progress, self)
+            #log.debug("converted %d%% of %s", progress, self)
             self.set_progress(progress)
 
     def on_eos_message(self, bus, message):
         self.set_progress(100.0)
         self.converted = True
+        app.emit_flex_object(body=self, topic="conversions", sub_topic='complete')
         self.stop()
 
     def set_progress(self, value):
         self.progress = value
-        app.emit_flex_object(body=self, sub_topic='conversionProgressUpdate')
+        app.emit_flex_object(body=self, topic="conversions", sub_topic='update')
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.filename)
@@ -174,8 +175,8 @@ class Application(object):
         # Setup ChannelSet
         channel_set = TwistedChannelSet(notify_connections=True)
 #        services = TwistedChannel('services', wait_interval=90000)
-        services = StreamingTwistedChannel('services')
-        channel_set.mapChannel(services)
+        amf_channel = StreamingTwistedChannel('amf-streaming')
+        channel_set.mapChannel(amf_channel)
 
 
         # Map class aliases
@@ -201,12 +202,16 @@ class Application(object):
 
         # Map service targets to controller methods
         cont_obj = controllers.Controller()
-        service = Service('WebServices')
-        service.mapTarget(CallableTarget(cont_obj.echo, 'echo'))
-        service.mapTarget(CallableTarget(cont_obj.raiseException, 'raiseException'))
-        service.mapTarget(CallableTarget(cont_obj.get_process_queue, 'get_process_queue'))
-        channel_set.service_mapper.mapService(service)        # Setup channels
-        root.putChild('services', services)
+        rpc_channel = TwistedChannel('rpc')
+        channel_set.mapChannel(rpc_channel)
+
+        rpc_service = Service('WebServices')
+        rpc_service.mapTarget(CallableTarget(cont_obj.raiseException, 'raiseException'))
+        rpc_service.mapTarget(CallableTarget(cont_obj.get_process_queue, 'get_process_queue'))
+        channel_set.service_mapper.mapService(rpc_service)        # Setup channels
+
+        root.putChild('amf-streaming', amf_channel)
+        root.putChild('rpc', rpc_channel)
         self.server = server.Site(root)
         self.channel_set = channel_set
 
@@ -242,7 +247,8 @@ class Application(object):
         conversion = Conversion(filename)
         self.process_queue.append(conversion)
         log.debug("Emitting Flex Object after adding conversion to queue")
-        self.emit_flex_object(body=conversion, sub_topic='queueItemAdded')
+        self.emit_flex_object(body=conversion, topic="conversions",
+                              sub_topic='new')
 
     def check_process_queue(self):
         log.debug("Currently in process Queue: %s", len(self.process_queue))

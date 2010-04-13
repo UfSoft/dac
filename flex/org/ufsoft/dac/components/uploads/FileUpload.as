@@ -8,6 +8,9 @@ package org.ufsoft.dac.components.uploads
   import flash.net.URLRequest;
   import mx.events.FlexEvent;
   import mx.core.ScrollPolicy;
+  import mx.core.BitmapAsset;
+  import ru.inspirit.net.MultipartURLLoader;
+
 
   public class FileUpload extends VBox
   {
@@ -19,6 +22,11 @@ package org.ufsoft.dac.components.uploads
     private var _bytesUploaded:uint;
     private var _uploadUrl:String;
     private var button:Button;
+
+
+    [Embed(source='/assets/remove.png')]
+    [Bindable] private var ButtonIcon:Class;
+
 
     // constructor
     public function FileUpload(file:FileReference,uploadUrl:String)
@@ -36,7 +44,10 @@ package org.ufsoft.dac.components.uploads
       setStyle("paddingBottom","10");
       setStyle("paddingTop","10");
       setStyle("paddingLeft","10");
+      setStyle("paddingRight","10");
+      this.percentWidth = 100;
       verticalScrollPolicy = ScrollPolicy.OFF;
+      horizontalScrollPolicy = ScrollPolicy.OFF;
 
       // set event listeners
       _file.addEventListener(Event.COMPLETE,OnUploadComplete);
@@ -46,25 +57,32 @@ package org.ufsoft.dac.components.uploads
       _file.addEventListener(SecurityErrorEvent.SECURITY_ERROR,OnSecurityError);
 
       // add controls
-      var hbox:HBox = new HBox();
+
+      var topHBox:HBox = new HBox();
+      topHBox.percentWidth = 100;
 
       nameText = new Text();
-      nameText.text = _file.name + "-" + FormatSize(_file.size);
+      nameText.text = _file.name + " - " + FormatSize(_file.size);
+      topHBox.addChild(nameText);
 
-      this.addChild(nameText);
+      var spacer:Spacer = new Spacer();
+      spacer.percentWidth = 100;
+      topHBox.addChild(spacer);
+
+      button = new Button();
+      button.setStyle("icon", ButtonIcon);
+      button.toolTip = "Remove from Queue";
+
+      topHBox.addChild(button);
+      button.addEventListener(MouseEvent.CLICK,OnRemoveButtonClicked);
+
+      this.addChild(topHBox);
 
       bar = new ProgressBar();
       bar.mode = ProgressBarMode.MANUAL;
       bar.label = "Uploaded 0%";
-      bar.width = 275;
-      hbox.addChild(bar);
-
-      button = new Button();
-      button.label = "Remove";
-
-      hbox.addChild(button);
-      button.addEventListener(MouseEvent.CLICK,OnRemoveButtonClicked);
-      this.addChild(hbox);
+      bar.percentWidth = 100;
+      this.addChild(bar);
     }
     private function OnRemoveButtonClicked(event:Event):void{
       if(_uploading)
@@ -141,6 +159,10 @@ package org.ufsoft.dac.components.uploads
       _uploading = true;
       _bytesUploaded = 0;
       _file.upload(new URLRequest(_uploadUrl));
+      /*_file.open();
+      var req:MultipartURLLoader = new MultipartURLLoader();
+      req.addFile(_file.data as ByteArray, _file.name);
+      req.load(_uploadUrl, true);*/
     }
 
     // cancels the upload of a file

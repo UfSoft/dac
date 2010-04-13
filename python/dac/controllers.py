@@ -4,7 +4,10 @@ Created on 28 Mar 2010
 @author: vampas
 '''
 
+import logging
 from twisted.web import resource
+
+log = logging.getLogger(__name__)
 
 class Controller(object):
     def echo(self, val):
@@ -15,6 +18,7 @@ class Controller(object):
 
     def get_process_queue(self):
         from dac.application import app
+        log.debug("Conversions QUeue QUERIED")
         return app.process_queue
 
 

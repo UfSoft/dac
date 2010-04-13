@@ -42,13 +42,5 @@ Panel {
   fontSize: 14;
 }
 
-DownloadButton {
-  width: 30px;
-  height: 30px;
-  icon: Embed('disk.png');
-  disabledIcon: Embed('disk-grey.png');
-}
-
-
 
 
