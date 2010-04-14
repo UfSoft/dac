@@ -61,7 +61,7 @@ package org.ufsoft.dac.conversions {
       downloadButton.toolTip = "Download";
       downloadButton.enabled = false;
       topHBox.addChild(downloadButton);
-      downloadButton.addEventListener(MouseEvent.CLICK,OnDownloadButtonClicked);
+      downloadButton.addEventListener(MouseEvent.CLICK, OnDownloadButtonClicked);
 
       this.addChild(topHBox);
 

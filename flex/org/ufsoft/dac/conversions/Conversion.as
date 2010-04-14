@@ -20,14 +20,13 @@ package org.ufsoft.dac.conversions
     private var fileRef:FileReference;
     private var urlReq:URLRequest;
 
-    private function download():void {
+    public function download():void {
       Logger.debug("Clicked. Downloading: ", this);
       /* Set up the URL request to download the file specified by the FILE_URL variable. */
       urlReq = new URLRequest(url);
 
       /* Define file reference object and add a bunch of event listeners. */
       fileRef = new FileReference();
-
       fileRef.download(urlReq);
     }
   }
