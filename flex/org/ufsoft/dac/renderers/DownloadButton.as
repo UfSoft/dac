@@ -8,7 +8,7 @@ package org.ufsoft.dac.renderers {
   import flash.net.FileReference;
   import flash.net.URLRequest;
 
-  import net.zengrong.logging.Firebug;
+  import org.osflash.thunderbolt.Logger;
 
   public class DownloadButton extends Button {
 
@@ -31,7 +31,7 @@ package org.ufsoft.dac.renderers {
     }
 
     public function onMouseClick(event:MouseEvent):void {
-      Firebug.debug("Download button clicked");
+      Logger.debug("Download button clicked");
       urlReq = new URLRequest(super.data.url);
       fileRef = new FileReference();
       try {

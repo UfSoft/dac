@@ -3,7 +3,7 @@
  */
 package org.ufsoft.dac.events {
 
-  import net.zengrong.logging.Firebug;
+  import org.osflash.thunderbolt.Logger;
 
   import flash.events.Event;
   import mx.collections.ArrayCollection;
@@ -19,7 +19,7 @@ package org.ufsoft.dac.events {
                                     cancelable:Boolean=false) {
       super(type, bubbles, cancelable);
       conversions = _conversions;
-      Firebug.debug("New QueueEvent", String(this));
+      Logger.debug("New QueueEvent", String(this));
     }
 
     override public function clone():Event {

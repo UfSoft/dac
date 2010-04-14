@@ -100,11 +100,13 @@ class Conversion(object):
         self.set_progress(100.0)
         self.converted = True
         app.emit_flex_object(body=self, topic="conversions", sub_topic='complete')
+        app.emit_flex_object(body=self, topic="conversions", sub_topic=str(self.id))
         self.stop()
 
     def set_progress(self, value):
         self.progress = value
         app.emit_flex_object(body=self, topic="conversions", sub_topic='update')
+        app.emit_flex_object(body=self, topic="conversions", sub_topic=str(self.id))
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.filename)

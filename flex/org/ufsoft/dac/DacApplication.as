@@ -5,18 +5,13 @@ package org.ufsoft.dac {
   import mx.core.Application;
 
   import mx.controls.Alert;
-  /* import firebug like debugger */
-  import com.flexspy.FlexSpy;
-  /* import firebug logging support, just use:
-     Firebug.debug('my debug messsage')
-  */
-  import net.zengrong.logging.Firebug;
+  import org.osflash.thunderbolt.Logger;
 
+  import flash.utils.setTimeout;
   import mx.collections.ArrayCollection;
   import mx.collections.ItemResponder;
   import mx.events.FlexEvent;
   import mx.messaging.Consumer;
-  import mx.messaging.Producer;
   import mx.messaging.ChannelSet;
   import mx.messaging.channels.AMFChannel;
   import mx.messaging.channels.StreamingAMFChannel;
@@ -32,7 +27,6 @@ package org.ufsoft.dac {
 
   import org.ufsoft.dac.conversions.Conversion;
   import org.ufsoft.dac.events.ConnectionEvent;
-  import org.ufsoft.dac.events.ConversionEvent;
   import org.ufsoft.dac.events.QueueEvent;
 
   public class DacApplication extends Application {
@@ -59,27 +53,12 @@ package org.ufsoft.dac {
       serverAMFUrl = 'http://{server.name}:{server.port}/rpc';
       serverStreamingUrl = 'http://{server.name}:{server.port}/amf-streaming';
       addEventListener(FlexEvent.CREATION_COMPLETE, applicationCreated);
+      // Disable Logging
+      //Logger.hide = true;
     }
 
     private function applicationCreated(event:Event):void {
-
-      Firebug.debug("Application Created");
-
-      // XXX: MultiTopicConsumer
-      newConversionsConsumer = getConsumer("conversions", "new");
-      newConversionsConsumer.addEventListener(MessageEvent.MESSAGE, newConversionEvent);
-      this.addEventListener(ConnectionEvent.CONNECTED, newConversionsConsumer.subscribe);
-      this.addEventListener(ConnectionEvent.DISCONNECTED, newConversionsConsumer.unsubscribe);
-
-      updatedConversionsConsumer = getConsumer("conversions", "update");
-      updatedConversionsConsumer.addEventListener(MessageEvent.MESSAGE, updatedConversionEvent);
-      this.addEventListener(ConnectionEvent.CONNECTED, updatedConversionsConsumer.subscribe);
-      this.addEventListener(ConnectionEvent.DISCONNECTED, updatedConversionsConsumer.unsubscribe);
-
-      completedConversionsConsumer = getConsumer("conversions", "complete");
-      completedConversionsConsumer.addEventListener(MessageEvent.MESSAGE, completedConversionEvent);
-      this.addEventListener(ConnectionEvent.CONNECTED, completedConversionsConsumer.subscribe);
-      this.addEventListener(ConnectionEvent.DISCONNECTED, completedConversionsConsumer.unsubscribe);
+      Logger.info("Application Created");
     }
 
     public function getChannel():ChannelSet {
@@ -87,7 +66,7 @@ package org.ufsoft.dac {
         // channel set is defined already, return it
         return appChannelSet;
       }
-      Firebug.debug("Creating channel");
+      Logger.info("Creating channel");
       // Create a channel set and add channel(s) to it
       appChannelSet = new ChannelSet();
       streamingChannel = new StreamingAMFChannel("amf-streaming", serverStreamingUrl);
@@ -101,39 +80,48 @@ package org.ufsoft.dac {
     }
 
     private function channelFault(event:ChannelFaultEvent):void {
-      Firebug.debug(String(event));
+      Logger.error(String(event));
     }
 
     private function channelConnected(event:ChannelEvent):void {
-      Firebug.debug("Channel Connected", String(event));
       if ( event.reconnecting ) {
+        Logger.warn("channelConnected - Reconnecting", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.RECONNECTING));
-        /*newConversionsConsumer.unsubscribe();
-        updatedConversionsConsumer.unsubscribe();
-        completedConversionsConsumer.unsubscribe();*/
+        setTimeout(queryConnection, 10);
+      } else if ( event.rejected ) {
+        Logger.error("channelConnected - Rejected", String(event));
+        this.dispatchEvent(new ConnectionEvent(ConnectionEvent.DISCONNECTED));
+        setTimeout(queryConnection, 10);
       } else {
+        Logger.info("channelConnected - Connected", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
-        /*newConversionsConsumer.subscribe();
-        updatedConversionsConsumer.subscribe();
-        completedConversionsConsumer.subscribe();*/
       }
-      queryQueueContents();
     }
 
     private function channelDisconnected(event:ChannelEvent):void {
-      Firebug.debug("Channel DisConnected");
       if ( event.reconnecting ) {
+        Logger.warn("channelDisconnected - Reconnecting", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.RECONNECTING));
+      } else if ( event.rejected ) {
+        Logger.error("channelDisconnected - Rejected", String(event));
+        this.dispatchEvent(new ConnectionEvent(ConnectionEvent.DISCONNECTED));
       } else {
+        Logger.info("channelDisconnected - Disconnected", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.DISCONNECTED));
       }
-      /*newConversionsConsumer.unsubscribe();
-      updatedConversionsConsumer.unsubscribe();
-      completedConversionsConsumer.unsubscribe();*/
+      setTimeout(queryConnection, 10);
+    }
+
+    private function queryConnection():void {
+      if ( appChannelSet.connected ) {
+        this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
+      } else {
+        setTimeout(queryConnection, 10);
+      }
     }
 
     public function getConsumer(destination:String, subtopic:String=null):Consumer {
-      Firebug.debug("Creating consumer");
+      Logger.info("Creating consumer: Destination", destination, "Sub-Topic:", subtopic);
       var consumer:Consumer = new Consumer()
       consumer.destination = destination;
       if ( subtopic != null) {
@@ -146,32 +134,6 @@ package org.ufsoft.dac {
       return consumer;
     }
 
-    private function conversionEvent(event:MessageEvent):void {
-      Firebug.debug(777, String(event.message));
-      var conversion:Conversion = event.message.body as Conversion;
-      var conversion_event:ConversionEvent = new ConversionEvent(ConversionEvent.NEW, conversion);
-      this.dispatchEvent(conversion_event);
-    }
-
-    private function newConversionEvent(event:MessageEvent):void {
-      var conversion:Conversion = event.message.body as Conversion;
-      var conversion_event:ConversionEvent = new ConversionEvent(ConversionEvent.NEW, conversion);
-      this.dispatchEvent(conversion_event);
-      Firebug.debug("Dispatched ConversionEvent.NEW:", String(conversion_event));
-    }
-
-    private function updatedConversionEvent(event:MessageEvent):void {
-      var conversion:Conversion = event.message.body as Conversion;
-      var conversion_event:ConversionEvent = new ConversionEvent(ConversionEvent.UPDATED, conversion);
-      this.dispatchEvent(conversion_event);
-      Firebug.debug("Dispatched ConversionEvent.UPDATED:", String(conversion_event));
-    }
-    private function completedConversionEvent(event:MessageEvent):void {
-      var conversion:Conversion = event.message.body as Conversion;
-      var conversion_event:ConversionEvent = new ConversionEvent(ConversionEvent.COMPLETE, conversion);
-      this.dispatchEvent(conversion_event);
-    }
-
     public function queryQueueContents():void {
       if ( remoteService == null) {
         remoteService = new RemoteObject("WebServices");
@@ -179,31 +141,31 @@ package org.ufsoft.dac {
         remoteService.showBusyCursor = true;
         remoteService.addEventListener(FaultEvent.FAULT, remoteServiceFault);
       }
-      Firebug.debug("QUERING QUEUE CONTENTS");
+      Logger.info("QUERING QUEUE CONTENTS");
       var token:AsyncToken = remoteService.get_process_queue();
-      Firebug.debug("QUERING QUEUE CONTENTS - Got Token");
+      Logger.info("QUERING QUEUE CONTENTS - Got Token");
       token.addResponder(new ItemResponder(queryQueueContentsResult,
                                            queryQueueContentsFault,
                                            token));
-      Firebug.debug("QUERING QUEUE CONTENTS - Added Responder");
+      Logger.info("QUERING QUEUE CONTENTS - Added Responder");
       //remoteService.get_process_queue.addEventListener("result", queryQueueContentsResult);
     }
 
     private function queryQueueContentsResult(event:ResultEvent, token:AsyncToken):void {
-      Firebug.debug("QUERING QUEUE CONTENTS - Got Result", String(event), String(event.result));
+      Logger.info("QUERING QUEUE CONTENTS - Got Result", String(event), String(event.result));
       var conversions:ArrayCollection = event.result as ArrayCollection;
-      Firebug.debug("QUERING QUEUE CONTENTS - conversions", String(conversions));
+      Logger.info("QUERING QUEUE CONTENTS - conversions", String(conversions));
       var queue_event:QueueEvent = new QueueEvent(QueueEvent.LIST, conversions);
       this.dispatchEvent(queue_event);
     }
 
     private function queryQueueContentsFault(event:FaultEvent, token:AsyncToken):void {
-      Firebug.debug("QUERING QUEUE CONTENTS - Got Fault");
-      Firebug.debug("queryQueueContentsFault", String(event));
+      Logger.info("QUERING QUEUE CONTENTS - Got Fault");
+      Logger.info("queryQueueContentsFault", String(event));
     }
 
     private function remoteServiceFault(event:FaultEvent):void {
-      Firebug.debug("remoteServiceFault", String(event));
+      Logger.error("remoteServiceFault", event);
     }
   }
 }

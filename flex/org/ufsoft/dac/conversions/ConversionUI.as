@@ -3,15 +3,17 @@
  */
 package org.ufsoft.dac.conversions {
 
-  import net.zengrong.logging.Firebug;
+  import org.osflash.thunderbolt.Logger;
 
   import flash.events.MouseEvent;
   import mx.containers.*;
   import mx.controls.*;
   import mx.core.Application;
   import mx.core.ScrollPolicy;
+  import mx.messaging.Consumer;
+  import mx.messaging.events.MessageEvent;
+  import mx.messaging.events.MessageFaultEvent;
   import org.ufsoft.dac.conversions.Conversion;
-  import org.ufsoft.dac.events.ConversionEvent;
 
   public class ConversionUI extends VBox {
 
@@ -19,6 +21,7 @@ package org.ufsoft.dac.conversions {
       private var inName:Text;
       private var outName:Text;
       private var downloadButton:Button;
+      private var consumer:Consumer;
 
       protected var _conversion:Conversion;
 
@@ -71,10 +74,6 @@ package org.ufsoft.dac.conversions {
 
       outName = new Text();
       this.addChild(outName);
-
-      // listeners
-      Application.application.addEventListener(ConversionEvent.COMPLETE, conversionComplete);
-      Application.application.addEventListener(ConversionEvent.UPDATED, conversionUpdated);
     }
 
     private function OnDownloadButtonClicked(event:Event):void{
@@ -82,32 +81,34 @@ package org.ufsoft.dac.conversions {
     }
 
     public function set conversion(value:Conversion):void {
-      Firebug.debug("ConversionUI setting conversion", String(value));
+      Logger.info("ConversionUI setting conversion", String(value));
       _conversion = value;
+      if ( consumer == null && _conversion.converted != true ) {
+        consumer = Application.application.getConsumer('conversions', String(_conversion.id));
+        consumer.addEventListener(MessageEvent.MESSAGE, updatedConversionEvent);
+        consumer.subscribe();
+      }
       inName.text = _conversion.filename;
       outName.text = _conversion.out_filename;
       downloadButton.enabled = _conversion.converted;
       progressBar.setProgress(_conversion.progress, 100);
+
     }
 
     public function get conversion():Conversion {
-      Firebug.debug("ConversionUI getting conversion");
+      Logger.info("ConversionUI getting conversion");
       return _conversion;
     }
 
-    private function conversionComplete(event:ConversionEvent):void {
-      if (event.conversion.id == _conversion.id ) {
+    private function updatedConversionEvent(event:MessageEvent):void {
+      Logger.info("ConversionUI.updatedConversionEvent", event.message);
+      var conversion:Conversion = event.message.body as Conversion;
+      _conversion = conversion;
+      progressBar.setProgress(_conversion.progress, 100);
+      downloadButton.enabled = _conversion.converted;
+      if ( _conversion.converted ) {
         downloadButton.enabled = true;
-      }
-    }
-
-    private function conversionUpdated(event:ConversionEvent):void {
-      if (event.conversion.id == _conversion.id ) {
-        Firebug.debug("ConversionUI.conversionUpdated", String(event));
-        progressBar.setProgress(event.conversion.progress, 100);
-        inName.text = _conversion.filename;
-        outName.text = _conversion.out_filename;
-        Firebug.debug("ConversionUI._conversion", String(_conversion));
+        consumer.unsubscribe();
       }
     }
   }

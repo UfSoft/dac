@@ -5,7 +5,8 @@
   <property name="APP_ROOT" value="./"/>
   <property name="DEPLOY_DIR" value="${APP_ROOT}/python/dac/shared"/>
   <property name="asdoc" value="${FLEX_HOME}bin/asdoc"/>
-  <property name="swf.version" value="10.0.0"/>
+  <!-- <property name="swf.version" value="10.0.0"/> -->
+  <property name="swf.version" value="9.0.0"/>
 
   <taskdef resource="flexTasks.tasks"
            classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
@@ -20,6 +21,7 @@
             <source-path path-element="${FLEX_HOME}/frameworks"/>
             <compiler.library-path dir="${APP_ROOT}/flex/lib" append="true">
               <include name="FlexSpy.swc"/>
+              <include name="ReflexUtil3.swc"/>
             </compiler.library-path>
         </mxmlc>
     </target>

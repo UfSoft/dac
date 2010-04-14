@@ -3,7 +3,7 @@
  */
 package org.ufsoft.dac.components {
 
-  import net.zengrong.logging.Firebug;
+  import org.osflash.thunderbolt.Logger;
 
   import mx.core.Application;
   import mx.controls.Button;
@@ -28,7 +28,7 @@ package org.ufsoft.dac.components {
     }
 
     private function handleConnectionEvent(event:ConnectionEvent):void {
-      Firebug.debug("ConnectionButton.as catched event");
+      Logger.debug("ConnectionButton.as catched event");
       if ( event.type == ConnectionEvent.CONNECTED ) {
         setStyle("icon", connectionUp);
         this.toolTip = "Connected";

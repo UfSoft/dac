@@ -10,27 +10,35 @@
   <mx:Script>
   <![CDATA[
 
-    import net.zengrong.logging.Firebug;
+    import org.osflash.thunderbolt.Logger;
 
     import mx.core.Application;
     import mx.events.FlexEvent;
     import mx.collections.ArrayCollection;
+    import mx.messaging.Consumer;
+    import mx.messaging.events.MessageEvent;
+    import mx.messaging.events.MessageFaultEvent;
     import org.ufsoft.dac.events.*;
     import org.ufsoft.dac.conversions.Conversion;
+
+    private var consumer:Consumer;
 
     [Bindable]
     private var conversions:ArrayCollection;
 
     private function creationComplete(event:FlexEvent):void {
+      conversions = new ArrayCollection();
+
       Application.application.addEventListener(ConnectionEvent.CONNECTED, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.DISCONNECTED, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.CONNECTING, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.RECONNECTING, handleConnectionEvent);
 
-      Application.application.addEventListener(ConversionEvent.NEW, newConversion);
+      consumer = Application.application.getConsumer('conversions', 'new');
+      consumer.addEventListener(MessageEvent.MESSAGE, newConversionEvent);
+      consumer.subscribe();
+
       Application.application.addEventListener(QueueEvent.LIST, handleQueueEvent);
-      conversions = new ArrayCollection();
-      Firebug.debug("ConvertQueuePanel created", String(conversions));
       Application.application.queryQueueContents();
 
     }
@@ -38,30 +46,34 @@
     private function handleConnectionEvent(event:ConnectionEvent):void {
       if ( event.type == ConnectionEvent.CONNECTED ) {
         // get all conversions
+        Logger.debug("CQP - handleConnectionEvent - queryQueueContents()", String(event));
         Application.application.queryQueueContents();
       } else {
+        Logger.debug("CQP - handleConnectionEvent - ELSE", String(event));
         // Lost connection, remove all from queue
         conversions.removeAll();
       }
     }
 
-    private function newConversion(event:ConversionEvent):void {
-      Firebug.debug("ConvertQueuePanel newConversion", String(event), String(event.conversion));
-      var conversion:Conversion = event.conversion as Conversion;
-      Firebug.debug("ConvertQueuePanel newConversion conversion", String(conversion));
+    private function newConversionEvent(event:MessageEvent):void {
+      Application.application.queryQueueContents();
+      var conversion:Conversion = event.message.body as Conversion;
+      Logger.debug("ConvertQueuePanel newConversion conversion", String(conversion));
       var existingIDs:Array = new Array();
       for ( var i:Number=0; i < conversions.length; i++ ) {
         existingIDs.push(conversions.getItemAt(i).id);
       }
-      Firebug.debug("Existing IDS", String(existingIDs), String(conversion.id));
+      Logger.debug("Existing IDS", String(existingIDs), String(conversion.id));
       if ( existingIDs.indexOf(conversion.id) == -1 ) {
         conversions.addItem(conversion);
-        Firebug.debug("ConvertQueuePanel newConversion added", String(conversions), String(event.conversion));
+        conversions.itemUpdated(conversion);
+        Logger.debug("ConvertQueuePanel newConversion added", String(conversions), String(conversion));
       }
+      Logger.info("conversions to array", conversions.toArray(), conversions.toArray().indexOf(conversion.id));
     }
 
     private function handleQueueEvent(event:QueueEvent):void {
-      Firebug.debug("Catched QUEUE event", String(event), String(event.conversions));
+      Logger.debug("Catched QUEUE event", String(event), String(event.conversions));
       conversions = event.conversions;
     }
 

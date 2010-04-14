@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <app:DacApplication xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:reflexutil="net.kandov.reflexutil.*"
                 xmlns:components="org.ufsoft.dac.components.*"
                 xmlns:app="org.ufsoft.dac.*"
                 layout="vertical"
@@ -10,16 +11,13 @@
                 frameRate="16"
                 themeColor="haloBlue">
   <mx:Style source="assets/style.css" />
-  <mx:Script>
-    import com.flexspy.FlexSpy;
-  </mx:Script>
+  <reflexutil:ReflexUtil/>
 
   <mx:ApplicationControlBar width="100%">
     <mx:Image source="{rtpLogo}"/>
     <mx:Label text="Audio Converter by Pedro Algarvio for Rádio e Televisão de Portugal"
               styleName="applicationControlBarLabel"/>
     <mx:Spacer width="100%"/>
-    <mx:Button id="btnFlexSpy" label="FlexSpy" click="FlexSpy.show()"/>
     <components:ConnectionButton id="connButton"/>
   </mx:ApplicationControlBar>
 
