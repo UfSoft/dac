@@ -180,6 +180,12 @@ class Application(object):
         amf_channel = StreamingTwistedChannel('amf-streaming')
         channel_set.mapChannel(amf_channel)
 
+        amf_polling = TwistedChannel('amf-polling')
+        channel_set.mapChannel(amf_polling)
+
+        amf_long_polling = TwistedChannel('amf-long-polling', wait_interval=90000)
+        channel_set.mapChannel(amf_long_polling)
+
 
         # Map class aliases
         # These same aliases must be
@@ -213,6 +219,8 @@ class Application(object):
         channel_set.service_mapper.mapService(rpc_service)        # Setup channels
 
         root.putChild('amf-streaming', amf_channel)
+        root.putChild('amf-polling', amf_polling)
+        root.putChild('amf-long-polling', amf_long_polling)
         root.putChild('rpc', rpc_channel)
         self.server = server.Site(root)
         self.channel_set = channel_set

@@ -32,7 +32,11 @@ package org.ufsoft.dac {
   public class DacApplication extends Application {
     private var serverAMFUrl:                 String;
     private var serverStreamingUrl:           String;
+    private var serverPollingUrl:             String;
+    private var serverLongPollingUrl:         String;
     private var streamingChannel:             StreamingAMFChannel;
+    private var pollingChannel:               AMFChannel;
+    private var longPollingChannel:           AMFChannel;
     private var servicesChannel:              AMFChannel;
     private var appChannelSet:                ChannelSet;
     private var conversionsConsumer   :       Consumer;
@@ -52,6 +56,8 @@ package org.ufsoft.dac {
       super();
       serverAMFUrl = 'http://{server.name}:{server.port}/rpc';
       serverStreamingUrl = 'http://{server.name}:{server.port}/amf-streaming';
+      serverPollingUrl = 'http://{server.name}:{server.port}/amf-polling';
+      serverLongPollingUrl = 'http://{server.name}:{server.port}/amf-long-polling';
       addEventListener(FlexEvent.CREATION_COMPLETE, applicationCreated);
       // Disable Logging
       //Logger.hide = true;
@@ -71,6 +77,10 @@ package org.ufsoft.dac {
       appChannelSet = new ChannelSet();
       streamingChannel = new StreamingAMFChannel("amf-streaming", serverStreamingUrl);
       appChannelSet.addChannel(streamingChannel);
+      pollingChannel = new AMFChannel("amf-polling", serverPollingUrl);
+      appChannelSet.addChannel(pollingChannel);
+      longPollingChannel = new AMFChannel("amf-long-polling", serverPollingUrl);
+      appChannelSet.addChannel(longPollingChannel);
       servicesChannel = new AMFChannel("rpc", serverAMFUrl)
       appChannelSet.addChannel(servicesChannel);
       appChannelSet.addEventListener(ChannelEvent.CONNECT, channelConnected);
