@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    ilog.utils.logger
+    baca.utils.logger
     ~~~~~~~~~~~~~~~~~
 
     This module defines a custom logging class which allows python's logging
@@ -16,7 +16,7 @@ from twisted.internet import defer
 LoggingLoggerClass = logging.getLoggerClass()
 
 class Logging(LoggingLoggerClass):
-    def __init__(self, logger_name='dac', level=logging.DEBUG):
+    def __init__(self, logger_name='baca', level=logging.DEBUG):
         LoggingLoggerClass.__init__(self, logger_name, level)
 
     @defer.inlineCallbacks

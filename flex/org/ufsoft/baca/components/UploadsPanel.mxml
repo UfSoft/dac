@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <components:UploadsPanelClass xmlns:mx="http://www.adobe.com/2006/mxml"
-                              xmlns:components="org.ufsoft.dac.components.uploads.*"
+                              xmlns:components="org.ufsoft.baca.components.uploads.*"
                               layout="vertical">
   <mx:Script>
   <![CDATA[

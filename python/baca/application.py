@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: sw=4 ts=4 fenc=utf-8 et
 """
-    dac.application
-    ~~~~~~~~~~~~~~~
+    baca.application
+    ~~~~~~~~~~~~~~~~
 
     This module is responsible for the whole application.
 
@@ -11,7 +11,6 @@
 """
 import gst
 import shutil
-import amfast
 import logging
 from ConfigParser import SafeConfigParser
 from os.path import abspath, basename, dirname, expanduser, isdir, join
@@ -23,10 +22,13 @@ from twisted.web import static, server, resource, vhost
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
 from twisted.internet.task import LoopingCall
-from amfast.remoting import Service, CallableTarget
-from amfast.remoting.twisted_channel import TwistedChannelSet, TwistedChannel, StreamingTwistedChannel
 
-from dac import controllers
+import amfast
+from amfast.remoting import Service, CallableTarget
+from amfast.remoting.twisted_channel import (TwistedChannelSet, TwistedChannel,
+                                             StreamingTwistedChannel)
+
+from baca import controllers
 
 usefull_path = lambda path: abspath(expanduser(path))
 
@@ -100,7 +102,7 @@ class Conversion(object):
 class Application(object):
     def __init__(self):
         self.config = ModuleType('afm.config')
-        self.config.file = 'dac.ini'
+        self.config.file = 'baca.ini'
         self.config.parser = SafeConfigParser()
         self.processing = False
         self.process_queue = []
@@ -182,9 +184,9 @@ class Application(object):
         # with the registClassAlias function,
         # or the RemoteClass metadata tag.
         class_mapper = ClassDefMapper()
-        class_mapper.mapClass(
-            DynamicClassDef(Conversion, 'org.ufsoft.dac.conversions.Conversion')
-        )
+        class_mapper.mapClass(DynamicClassDef(
+            Conversion, 'org.ufsoft.baca.conversions.Conversion'
+        ))
 
         # Set Channel options
         # We're going to use the same

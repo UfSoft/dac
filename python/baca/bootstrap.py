@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: sw=4 ts=4 fenc=utf-8 et
 """
-    dac.bootstrap
-    ~~~~~~~~~~~~~
+    baca.bootstrap
+    ~~~~~~~~~~~~~~
 
     This module is responsible for console usage options.
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     import sys
     sys.path.insert(0, dirname(dirname(__file__)))
 
-from dac import __version__
+from baca import __version__
 
 usefull_path = lambda path: abspath(expanduser(path))
 
@@ -159,14 +159,14 @@ class RunServerOptions(BaseUsageOptions):
         self.opts['port'] = int(port)
 
     def executeCommand(self):
-        from dac.application import app
-        logging.getLogger('dac.bootstrap').debug("We have lift off!!!")
+        from baca.application import app
+        logging.getLogger('baca.bootstrap').debug("We have lift off!!!")
         reactor.listenTCP(self.opts['port'], app.build_root())
         reactor.run()
 
 class ServiceOptions(BaseUsageOptions):
     optParameters = [
-        ("config", "c", "~/.dac", "Configuration directory"),
+        ("config", "c", "~/.baca", "Configuration directory"),
     ]
 
     subCommands = [
@@ -176,7 +176,7 @@ class ServiceOptions(BaseUsageOptions):
     defaultSubCommand = "serve"
 
     def opt_config(self, config_dir):
-        from dac.application import app
+        from baca.application import app
         self.opts['config'] = usefull_path(config_dir)
         if not isdir(self.opts['config']):
             makedirs(self.opts['config'])
@@ -311,7 +311,7 @@ class ServiceOptions(BaseUsageOptions):
             session.close()
 
     def postOptions(self):
-        from dac.application import app
+        from baca.application import app
         if self.opts['config'] == "~/.ilog":
             self.opt_config(self.opts['config'])
 
@@ -322,7 +322,7 @@ class ServiceOptions(BaseUsageOptions):
         app.config_load()
 
         # Setup logging
-        from dac.utils.logger import Logging
+        from baca.utils.logger import Logging
         if logging.getLoggerClass() is not Logging:
             logging.config.fileConfig(
                 usefull_path(str(app.config.logging_config_file))

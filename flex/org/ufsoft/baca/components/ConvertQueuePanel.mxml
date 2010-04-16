@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
-          xmlns:conversions="org.ufsoft.dac.conversions.*"
+          xmlns:conversions="org.ufsoft.baca.conversions.*"
           layout="vertical"
           width="100%"
           height="50%"
@@ -18,8 +18,8 @@
     import mx.messaging.Consumer;
     import mx.messaging.events.MessageEvent;
     import mx.messaging.events.MessageFaultEvent;
-    import org.ufsoft.dac.events.*;
-    import org.ufsoft.dac.conversions.Conversion;
+    import org.ufsoft.baca.events.*;
+    import org.ufsoft.baca.conversions.Conversion;
 
     private var consumer:Consumer;
 
@@ -85,4 +85,7 @@
       <conversions:ConversionUI conversion="{conversionsRepeater.currentItem}"/>
     </mx:Repeater>
   </mx:VBox>
+  <mx:ControlBar visible="false">
+    <mx:ProgressBar id="downloadsProgress" width="100%"/>
+  </mx:ControlBar>
 </mx:Panel>

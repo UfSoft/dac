@@ -7,17 +7,17 @@
 # ==============================================================================
 
 """
-Dalet Audio Convert
-===================
+Broadcast Audio Converter Anywhere
+==================================
 
-Online Dalet Supported Audio Format Converter.
+Broadcast Audio Converter Anywhere.
 """
 
 __version__     = '0.1'
-__package__     = 'DaletAudioConvert'
-__summary__     = "Online Dalet Supported Audio Format Converter."
+__package__     = 'BACA'
+__summary__     = "Broadcast Audio Converter Anywhere."
 __author__      = 'Pedro Algarvio'
 __email__       = 'ufs@ufsoft.org'
 __license__     = 'BSD'
-__url__         = 'https://hg.ufsoft.org/ILog'
+__url__         = 'https://hg.ufsoft.org/BACA'
 __description__ = __doc__

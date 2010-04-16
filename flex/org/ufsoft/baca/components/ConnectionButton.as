@@ -1,14 +1,14 @@
 /**
  * @author vampas
  */
-package org.ufsoft.dac.components {
+package org.ufsoft.baca.components {
 
   import org.osflash.thunderbolt.Logger;
 
   import mx.core.Application;
   import mx.controls.Button;
   import mx.messaging.ChannelSet;
-  import org.ufsoft.dac.events.ConnectionEvent;
+  import org.ufsoft.baca.events.ConnectionEvent;
 
   public class ConnectionButton extends Button {
     [Bindable]

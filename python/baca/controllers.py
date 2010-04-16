@@ -17,7 +17,7 @@ class Controller(object):
         raise Exception("Example Exception")
 
     def get_process_queue(self):
-        from dac.application import app
+        from baca.application import app
         log.debug("Conversions QUeue QUERIED")
         return app.process_queue
 
@@ -26,7 +26,7 @@ class Controller(object):
 class UploadResource(resource.Resource):
 
     def render_POST(self, request):
-        from dac.application import app
+        from baca.application import app
         app.save_file(request.args['Filename'][0], request.args['Filedata'][0])
         return "OK"
 
