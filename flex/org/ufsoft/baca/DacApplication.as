@@ -31,7 +31,8 @@ package org.ufsoft.baca {
 
   public class DacApplication extends Application {
 
-    private static const CONNECT_TIMEOUT:Number = 5;
+    private static const CONNECT_TIMEOUT        :Number = 5;
+    private static const MAX_CONNECTION_FAILURES:Number = 10;
 
     private var serverAMFUrl:                 String;
     private var serverStreamingUrl:           String;
@@ -47,6 +48,7 @@ package org.ufsoft.baca {
     private var updatedConversionsConsumer:   Consumer;
     private var completedConversionsConsumer: Consumer;
     private var remoteService:                RemoteObject;
+    private var connectionFailures:           Number = 0;
 
     private var cookie:                       SharedObject;
 
@@ -75,11 +77,8 @@ package org.ufsoft.baca {
     }
 
     private function applicationCreated(event:Event):void {
-      Logger.info("Application Created");
-      if ( (cookie.data.no_streaming_support || false) == false ) {
-        Logger.info("Streaming not available. Removing streaming channel");
-        appChannelSet.removeChannel(streamingChannel);
-      }
+      Logger.info("Application Created", cookie.data);
+      Logger.info("Dispatching ApplicationEvent.RUNNING");
       this.dispatchEvent(new ApplicationEvent(ApplicationEvent.RUNNING));
     }
 
@@ -92,10 +91,13 @@ package org.ufsoft.baca {
       // Create a channel set and add channel(s) to it
       appChannelSet = new ChannelSet();
 
-      streamingChannel = new StreamingAMFChannel("amf-streaming",
-                                                 serverStreamingUrl);
-      streamingChannel.connectTimeout = CONNECT_TIMEOUT;
-      appChannelSet.addChannel(streamingChannel);
+      if ( (cookie.data.no_streaming_support || false) == false ) {
+        Logger.info("Streaming available. Adding streaming channel");
+        streamingChannel = new StreamingAMFChannel("amf-streaming",
+                                                  serverStreamingUrl);
+        streamingChannel.connectTimeout = CONNECT_TIMEOUT;
+        appChannelSet.addChannel(streamingChannel);
+      }
 
       pollingChannel = new AMFChannel("amf-polling", serverPollingUrl);
       pollingChannel.pollingInterval = 2; // in seconds
@@ -114,11 +116,6 @@ package org.ufsoft.baca {
       appChannelSet.addEventListener(ChannelEvent.DISCONNECT, channelDisconnected);
       appChannelSet.addEventListener(ChannelFaultEvent.FAULT, channelFault);
 
-      if ( (cookie.data.no_streaming_support || false) == false ) {
-        Logger.info("Streaming not available. Removing streaming channel");
-        appChannelSet.removeChannel(streamingChannel);
-      }
-
       return appChannelSet;
     }
 
@@ -129,6 +126,7 @@ package org.ufsoft.baca {
         cookie.flush();
       }
       Logger.error("channelFault", String(event));
+      connectionFailures += 1;
     }
 
     private function channelConnected(event:ChannelEvent):void {
@@ -143,6 +141,7 @@ package org.ufsoft.baca {
       } else {
         Logger.info("channelConnected - Connected", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
+        connectionFailures = 0;
       }
     }
 
@@ -163,8 +162,11 @@ package org.ufsoft.baca {
     private function queryConnection():void {
       if ( appChannelSet.connected ) {
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
+      } else if ( connectionFailures <= MAX_CONNECTION_FAILURES ) {
+          setTimeout(queryConnection, 10);
       } else {
-        setTimeout(queryConnection, 10);
+        Logger.warn("Desconnecting all channels");
+        appChannelSet.disconnectAll();
       }
     }
 

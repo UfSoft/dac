@@ -39,6 +39,7 @@
     }
 
     private function applicationIsRunning(event:ApplicationEvent):void {
+      Logger.info("ApplicationEvent.RUNNING caught creating consumer");
       consumer = Application.application.getConsumer('conversions', 'new');
       consumer.addEventListener(MessageEvent.MESSAGE, newConversionEvent);
       consumer.subscribe();
