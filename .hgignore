@@ -5,6 +5,7 @@ scripts/**
 tests/**
 .config/logs/**
 .config/**
+.externalToolBuilders/**
 
 syntax: regexp
 ^flex/generated(.*)
