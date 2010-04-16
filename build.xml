@@ -3,7 +3,7 @@
 <project name="My App Builder" basedir="." default="main">
   <property name="FLEX_HOME" value="/opt/Adobe/SDKs/Flex/3.2.0"/>
   <property name="APP_ROOT" value="./"/>
-  <property name="DEPLOY_DIR" value="${APP_ROOT}/python/dac/shared"/>
+  <property name="DEPLOY_DIR" value="${APP_ROOT}/python/baca/shared"/>
   <property name="asdoc" value="${FLEX_HOME}bin/asdoc"/>
   <!-- <property name="swf.version" value="10.0.0"/> -->
   <property name="swf.version" value="9.0.0"/>
@@ -45,7 +45,7 @@
           <delete>
              <fileset dir="${DEPLOY_DIR}" includes="Main.swf"/>
               <!-- Deletes playerProductInstall.swf -->
-              <fileset dir="${APP_ROOT}/python/dac/shared"
+              <fileset dir="${APP_ROOT}/python/baca/shared"
                   includes="playerProductInstall.swf"
                   defaultexcludes="false"/>
               <!-- Deletes index.html and historyFrame.html -->

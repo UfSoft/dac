@@ -29,18 +29,19 @@
     private function creationComplete(event:FlexEvent):void {
       conversions = new ArrayCollection();
 
+      Application.application.addEventListener(ApplicationEvent.RUNNING, applicationIsRunning);
       Application.application.addEventListener(ConnectionEvent.CONNECTED, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.DISCONNECTED, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.CONNECTING, handleConnectionEvent);
       Application.application.addEventListener(ConnectionEvent.RECONNECTING, handleConnectionEvent);
+      Application.application.addEventListener(QueueEvent.LIST, handleQueueEvent);
 
+    }
+
+    private function applicationIsRunning(event:ApplicationEvent):void {
       consumer = Application.application.getConsumer('conversions', 'new');
       consumer.addEventListener(MessageEvent.MESSAGE, newConversionEvent);
       consumer.subscribe();
-
-      Application.application.addEventListener(QueueEvent.LIST, handleQueueEvent);
-      Application.application.queryQueueContents();
-
     }
 
     private function handleConnectionEvent(event:ConnectionEvent):void {

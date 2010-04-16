@@ -9,4 +9,4 @@ tests/**
 
 syntax: regexp
 ^flex/generated(.*)
-^python/dac/shared/Main.swf(.*)$
+^python/baca/shared/Main.swf(.*)$

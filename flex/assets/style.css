@@ -8,10 +8,14 @@ global {
 Application {
   paddingTop: 10;
   paddingRight: 10;
-  paddingBottom: 10;
+  paddingBottom: 0;
   paddingLeft: 10;
   horizontalGap: 10;
   verticalGap: 10;
+  /*background-image: Embed("/assets/copy.png");
+  background-size: 97px 16px;
+  backgroundPosition: "bottom right";
+  background-repeat: no-repeat;*/
 }
 
 ApplicationControlBar {
@@ -42,5 +46,10 @@ Panel {
   fontSize: 14;
 }
 
-
+.copyText {
+  letterSpacing: 2;
+  fontSize: 8;
+  fontStyle: italic;
+  color: #ffffff;
+}
 

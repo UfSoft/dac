@@ -7,6 +7,7 @@ package org.ufsoft.baca {
   import mx.controls.Alert;
   import org.osflash.thunderbolt.Logger;
 
+  import flash.net.SharedObject;
   import flash.utils.setTimeout;
   import mx.collections.ArrayCollection;
   import mx.collections.ItemResponder;
@@ -26,8 +27,7 @@ package org.ufsoft.baca {
   import mx.rpc.events.FaultEvent;
 
   import org.ufsoft.baca.conversions.Conversion;
-  import org.ufsoft.baca.events.ConnectionEvent;
-  import org.ufsoft.baca.events.QueueEvent;
+  import org.ufsoft.baca.events.*;
 
   public class DacApplication extends Application {
 
@@ -48,12 +48,10 @@ package org.ufsoft.baca {
     private var completedConversionsConsumer: Consumer;
     private var remoteService:                RemoteObject;
 
+    private var cookie:                       SharedObject;
+
     [Bindable]
     [Embed('/assets/rtp.png')] public var rtpLogo:Class;
-    [Embed('/assets/connect_no.png')] public var connectionDown:Class;
-    /*[Embed('/assets/connect_creating.png')] private var connectionConnecting:Class;
-    [Embed('/assets/connect_established.png')] private var connectionUp:Class;
-    private var connectionStatus:Image = connectionConnecting;*/
 
     public function DacApplication() {
       super();
@@ -71,10 +69,18 @@ package org.ufsoft.baca {
       addEventListener(FlexEvent.CREATION_COMPLETE, applicationCreated);
       // Disable Logging
       //Logger.hide = true;
+
+      // Cookies!!!
+      cookie = SharedObject.getLocal("BroadcastAudioConverterAnywhere");
     }
 
     private function applicationCreated(event:Event):void {
       Logger.info("Application Created");
+      if ( (cookie.data.no_streaming_support || false) == false ) {
+        Logger.info("Streaming not available. Removing streaming channel");
+        appChannelSet.removeChannel(streamingChannel);
+      }
+      this.dispatchEvent(new ApplicationEvent(ApplicationEvent.RUNNING));
     }
 
     public function getChannel():ChannelSet {
@@ -85,7 +91,9 @@ package org.ufsoft.baca {
       Logger.info("Creating channel");
       // Create a channel set and add channel(s) to it
       appChannelSet = new ChannelSet();
-      streamingChannel = new StreamingAMFChannel("amf-streaming", serverStreamingUrl);
+
+      streamingChannel = new StreamingAMFChannel("amf-streaming",
+                                                 serverStreamingUrl);
       streamingChannel.connectTimeout = CONNECT_TIMEOUT;
       appChannelSet.addChannel(streamingChannel);
 
@@ -101,13 +109,25 @@ package org.ufsoft.baca {
 
       servicesChannel = new AMFChannel("rpc", serverAMFUrl)
       appChannelSet.addChannel(servicesChannel);
+
       appChannelSet.addEventListener(ChannelEvent.CONNECT, channelConnected);
       appChannelSet.addEventListener(ChannelEvent.DISCONNECT, channelDisconnected);
       appChannelSet.addEventListener(ChannelFaultEvent.FAULT, channelFault);
+
+      if ( (cookie.data.no_streaming_support || false) == false ) {
+        Logger.info("Streaming not available. Removing streaming channel");
+        appChannelSet.removeChannel(streamingChannel);
+      }
+
       return appChannelSet;
     }
 
     private function channelFault(event:ChannelFaultEvent):void {
+      if ( event.channelId == "amf-streaming" ) {
+        Logger.info("Permanently disabling streaming support")
+        cookie.data.no_streaming_support = true;
+        cookie.flush();
+      }
       Logger.error("channelFault", String(event));
     }
 
@@ -169,26 +189,19 @@ package org.ufsoft.baca {
         remoteService.showBusyCursor = true;
         remoteService.addEventListener(FaultEvent.FAULT, remoteServiceFault);
       }
-      Logger.info("QUERING QUEUE CONTENTS");
       var token:AsyncToken = remoteService.get_process_queue();
-      Logger.info("QUERING QUEUE CONTENTS - Got Token");
       token.addResponder(new ItemResponder(queryQueueContentsResult,
                                            queryQueueContentsFault,
                                            token));
-      Logger.info("QUERING QUEUE CONTENTS - Added Responder");
-      //remoteService.get_process_queue.addEventListener("result", queryQueueContentsResult);
     }
 
     private function queryQueueContentsResult(event:ResultEvent, token:AsyncToken):void {
-      Logger.info("QUERING QUEUE CONTENTS - Got Result", String(event), String(event.result));
       var conversions:ArrayCollection = event.result as ArrayCollection;
-      Logger.info("QUERING QUEUE CONTENTS - conversions", String(conversions));
       var queue_event:QueueEvent = new QueueEvent(QueueEvent.LIST, conversions);
       this.dispatchEvent(queue_event);
     }
 
     private function queryQueueContentsFault(event:FaultEvent, token:AsyncToken):void {
-      Logger.info("QUERING QUEUE CONTENTS - Got Fault");
       Logger.info("queryQueueContentsFault", String(event));
     }
 
