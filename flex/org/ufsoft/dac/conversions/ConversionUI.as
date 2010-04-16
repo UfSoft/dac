@@ -6,6 +6,8 @@ package org.ufsoft.dac.conversions {
   import org.osflash.thunderbolt.Logger;
 
   import flash.events.MouseEvent;
+  import flash.net.FileReference;
+  import flash.net.URLRequest;
   import mx.containers.*;
   import mx.controls.*;
   import mx.core.Application;
@@ -39,6 +41,7 @@ package org.ufsoft.dac.conversions {
       setStyle("paddingTop","10");
       setStyle("paddingLeft","10");
       setStyle("paddingRight","10");
+
       this.percentWidth = 100;
       verticalScrollPolicy = ScrollPolicy.OFF;
       horizontalScrollPolicy = ScrollPolicy.OFF;
@@ -46,9 +49,18 @@ package org.ufsoft.dac.conversions {
       // add controls
 
       var topHBox:HBox = new HBox();
+      topHBox.setStyle("paddingBottom","2");
+      topHBox.setStyle("paddingTop","2");
+      topHBox.setStyle("marginBottom","0");
+
       topHBox.percentWidth = 100;
 
-      inName = new Text()
+      var inNameLabel:Text = new Text();
+      inNameLabel.htmlText = "<b>IN:</b>";
+      inNameLabel.setStyle("paddingRight","0");
+      topHBox.addChild(inNameLabel)
+      inName = new Text();
+      inNameLabel.setStyle("paddingLeft","0");
       topHBox.addChild(inName)
 
       var spacer:Spacer = new Spacer();
@@ -72,12 +84,29 @@ package org.ufsoft.dac.conversions {
       progressBar.labelPlacement="right"
       this.addChild(progressBar);
 
+      var bottomHBox:HBox = new HBox();
+      bottomHBox.setStyle("paddingBottom","2");
+      bottomHBox.setStyle("paddingTop","2");
+      bottomHBox.setStyle("marginTop","0");
+
+      var outNameLabel:Text = new Text();
+      outNameLabel.htmlText = "<b>OUT:</b>";
+      outNameLabel.setStyle("paddingRight","0");
+      bottomHBox.addChild(outNameLabel);
       outName = new Text();
-      this.addChild(outName);
+      outName.setStyle("paddingLeft","0");
+      bottomHBox.addChild(outName);
+      this.addChild(bottomHBox);
     }
 
     private function OnDownloadButtonClicked(event:Event):void{
-      _conversion.download();
+      Logger.debug("Clicked. Downloading: ", _conversion);
+      /* Set up the URL request to download the file specified by the FILE_URL variable. */
+      var urlReq:URLRequest = new URLRequest(_conversion.url);
+
+      /* Define file reference object and add a bunch of event listeners. */
+      var fileRef:FileReference = new FileReference();
+      fileRef.download(urlReq);
     }
 
     public function set conversion(value:Conversion):void {
@@ -88,8 +117,8 @@ package org.ufsoft.dac.conversions {
         consumer.addEventListener(MessageEvent.MESSAGE, updatedConversionEvent);
         consumer.subscribe();
       }
-      inName.text = _conversion.filename;
-      outName.text = _conversion.out_filename;
+      inName.htmlText = "<i>" + _conversion.filename + "</i>";
+      outName.htmlText = "<i>" + _conversion.out_filename + "</i>";
       downloadButton.enabled = _conversion.converted;
       progressBar.setProgress(_conversion.progress, 100);
 
