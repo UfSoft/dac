@@ -41,34 +41,20 @@ class Conversion(object):
         self.progress = 0
         self.processing = False
         self.converted = False
-        self.in_filepath = join(app.config.uploads_dir, filename)
-        self.out_filepath = join(app.config.downloads_dir, "%s.mp2" % filename)
+        self.in_filepath = join(app.config.uploads_dir, self.filename)
+        self.out_filepath = join(app.config.downloads_dir, self.out_filename)
         self.url = '/downloads/%s' % basename(self.out_filepath)
 
     def process(self):
         log.debug("Started processing %s", self)
-#        pipeline_str = (
-#            "filesrc location=\"%s\" ! decodebin2 ! audioconvert ! "
-#            "audio/x-raw-int,channels=2 ! audioresample ! "
-#            "progressreport update-freq=1 silent=TRUE ! ffenc_mp2 ! "
-#            "ffmux_mp2 ! filesink location=\"%s\"" % (self.in_filepath,
-#                                                      self.out_filepath)
-#        )
         pipeline_str = (
-            "filesrc location=\"%s\" ! decodebin2 ! queue ! audioconvert ! audioresample ! "
-            "progressreport update-freq=1 silent=TRUE ! "
-            "audio/x-raw-int,channels=2, depth=(int)16, rate=(int)48000, signed=(boolean)true ! "
-            "twolame bitrate=256 mode=0 energy-level-extension=true error-protection=true ! "
-            "queue ! filesink location=\"%s\"" % (self.in_filepath,
-                                                                      self.out_filepath)
+            "filesrc location=\"%s\" ! decodebin2 ! queue ! audioconvert ! "
+            "audioresample ! progressreport update-freq=1 silent=TRUE ! "
+            "audio/x-raw-int,channels=2, depth=(int)16, rate=(int)48000, "
+            "signed=(boolean)true ! twolame bitrate=256 mode=0 "
+            "energy-level-extension=true error-protection=true ! queue ! "
+            "filesink location=\"%s\"" % (self.in_filepath, self.out_filepath)
         )
-#        pipeline_str = (
-#            "filesrc location=\"%s\" ! decodebin2 ! queue ! audioconvert ! audioresample ! "
-#            "audio/x-raw-int,channels=2, depth=(int)16, rate=(int)48000, signed=(boolean)true ! "
-#            "progressreport update-freq=1 silent=TRUE ! faac bitrate=256000 ! audio/mpeg, mpegversion=(int)2, channels=(int)2 rate=(int)48000 ! "
-#            "queue ! ffmux_mp4 ! filesink location=\"%s\"" % (self.in_filepath,
-#                                                      self.out_filepath)
-#        )
 
         self.pipeline = gst.parse_launch(pipeline_str)
         log.debug("Launch Pipeline: '%s'", pipeline_str)
@@ -93,23 +79,23 @@ class Conversion(object):
     def on_message(self, bus, message):
         if message.structure and message.structure.get_name() == 'progress':
             progress = message.structure['percent-double']
-            #log.debug("converted %d%% of %s", progress, self)
             self.set_progress(progress)
 
     def on_eos_message(self, bus, message):
         self.set_progress(100.0)
         self.converted = True
-        app.emit_flex_object(body=self, topic="conversions", sub_topic='complete')
-        app.emit_flex_object(body=self, topic="conversions", sub_topic=str(self.id))
+        app.emit_flex_object(body=self, topic="conversions",
+                             sub_topic=str(self.id))
         self.stop()
 
     def set_progress(self, value):
         self.progress = value
-        app.emit_flex_object(body=self, topic="conversions", sub_topic='update')
-        app.emit_flex_object(body=self, topic="conversions", sub_topic=str(self.id))
+        app.emit_flex_object(body=self, topic="conversions",
+                             sub_topic=str(self.id))
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.filename)
+
 
 class Application(object):
     def __init__(self):
@@ -176,13 +162,16 @@ class Application(object):
 
         # Setup ChannelSet
         channel_set = TwistedChannelSet(notify_connections=True)
-#        services = TwistedChannel('services', wait_interval=90000)
-        amf_channel = StreamingTwistedChannel('amf-streaming')
-        channel_set.mapChannel(amf_channel)
 
+        # Streaming
+        amf_streaming = StreamingTwistedChannel('amf-streaming')
+        channel_set.mapChannel(amf_streaming)
+
+        # Regular polling
         amf_polling = TwistedChannel('amf-polling')
         channel_set.mapChannel(amf_polling)
 
+        # Long polling
         amf_long_polling = TwistedChannel('amf-long-polling', wait_interval=90000)
         channel_set.mapChannel(amf_long_polling)
 
@@ -194,8 +183,7 @@ class Application(object):
         # or the RemoteClass metadata tag.
         class_mapper = ClassDefMapper()
         class_mapper.mapClass(
-            DynamicClassDef(Conversion,
-                            'org.ufsoft.dac.conversions.Conversion')
+            DynamicClassDef(Conversion, 'org.ufsoft.dac.conversions.Conversion')
         )
 
         # Set Channel options
@@ -214,11 +202,11 @@ class Application(object):
         channel_set.mapChannel(rpc_channel)
 
         rpc_service = Service('WebServices')
-        rpc_service.mapTarget(CallableTarget(cont_obj.raiseException, 'raiseException'))
-        rpc_service.mapTarget(CallableTarget(cont_obj.get_process_queue, 'get_process_queue'))
-        channel_set.service_mapper.mapService(rpc_service)        # Setup channels
+        rpc_service.mapTarget(CallableTarget(cont_obj.get_process_queue,
+                                             'get_process_queue'))
+        channel_set.service_mapper.mapService(rpc_service)     # Setup channels
 
-        root.putChild('amf-streaming', amf_channel)
+        root.putChild('amf-streaming', amf_streaming)
         root.putChild('amf-polling', amf_polling)
         root.putChild('amf-long-polling', amf_long_polling)
         root.putChild('rpc', rpc_channel)
@@ -240,7 +228,7 @@ class Application(object):
         global log
         log = logging.getLogger(__name__)
         amfast.log_debug = True
-#        amfast.logger.addHandler(logging.getLogger('amfast').handlers[0])
+        amfast.logger.addHandler(logging.getLogger('amfast').handlers[0])
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.DEBUG)
         amfast.logger.addHandler(handler)
