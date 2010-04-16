@@ -30,6 +30,9 @@ package org.ufsoft.dac {
   import org.ufsoft.dac.events.QueueEvent;
 
   public class DacApplication extends Application {
+
+    private static const CONNECT_TIMEOUT:Number = 5;
+
     private var serverAMFUrl:                 String;
     private var serverStreamingUrl:           String;
     private var serverPollingUrl:             String;
@@ -54,10 +57,17 @@ package org.ufsoft.dac {
 
     public function DacApplication() {
       super();
-      serverAMFUrl = 'http://{server.name}:{server.port}/rpc';
+
+      /* serverAMFUrl = 'http://{server.name}:{server.port}/rpc';
       serverStreamingUrl = 'http://{server.name}:{server.port}/amf-streaming';
       serverPollingUrl = 'http://{server.name}:{server.port}/amf-polling';
-      serverLongPollingUrl = 'http://{server.name}:{server.port}/amf-long-polling';
+      serverLongPollingUrl = 'http://{server.name}:{server.port}/amf-long-polling'; */
+
+      serverAMFUrl = '/rpc';
+      serverStreamingUrl = '/amf-streaming';
+      serverPollingUrl = '/amf-polling';
+      serverLongPollingUrl = '/amf-long-polling';
+
       addEventListener(FlexEvent.CREATION_COMPLETE, applicationCreated);
       // Disable Logging
       //Logger.hide = true;
@@ -76,11 +86,19 @@ package org.ufsoft.dac {
       // Create a channel set and add channel(s) to it
       appChannelSet = new ChannelSet();
       streamingChannel = new StreamingAMFChannel("amf-streaming", serverStreamingUrl);
+      streamingChannel.connectTimeout = CONNECT_TIMEOUT;
       appChannelSet.addChannel(streamingChannel);
+
       pollingChannel = new AMFChannel("amf-polling", serverPollingUrl);
+      pollingChannel.pollingInterval = 2; // in seconds
+      pollingChannel.connectTimeout = CONNECT_TIMEOUT;
       appChannelSet.addChannel(pollingChannel);
+
       longPollingChannel = new AMFChannel("amf-long-polling", serverPollingUrl);
+      longPollingChannel.pollingInterval = 5; // in seconds
+      longPollingChannel.connectTimeout = CONNECT_TIMEOUT;
       appChannelSet.addChannel(longPollingChannel);
+
       servicesChannel = new AMFChannel("rpc", serverAMFUrl)
       appChannelSet.addChannel(servicesChannel);
       appChannelSet.addEventListener(ChannelEvent.CONNECT, channelConnected);
@@ -90,7 +108,7 @@ package org.ufsoft.dac {
     }
 
     private function channelFault(event:ChannelFaultEvent):void {
-      Logger.error(String(event));
+      Logger.error("channelFault", String(event));
     }
 
     private function channelConnected(event:ChannelEvent):void {
