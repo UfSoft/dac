@@ -84,13 +84,18 @@ package org.ufsoft.baca {
       cookie = SharedObject.getLocal("BroadcastAudioConverterAnywhere");
       STREAMING_AVAILABLE = cookie.data.streaming_available || true;
       locale = Locale.getInstance();
+      locale.addEventListener(TranslationEvent.LOADED, translationLoaded);
       locale.load(cookie.data.locale || 'pt_PT');
+    }
+
+    public function setCookiePropery(name:String, value:Object):void {
+      cookie.setProperty(name, value);
+      cookie.flush();
     }
 
     private function translationLoaded(event:TranslationEvent):void {
       Logger.info("Translation Loaded. Storing locale in cookie");
-      cookie.data.locale = Locale.getInstance().getLocale();
-      cookie.flush();
+      this.setCookiePropery('locale', Locale.getInstance().getLocale());
     }
 
     private function setupInitialLocale(event:FlexEvent):void {
@@ -141,11 +146,10 @@ package org.ufsoft.baca {
     }
 
     private function channelFault(event:ChannelFaultEvent):void {
-      if ( event.channelId == "amf-streaming" && !CONNECTED_ONCE ) {
+      if ( event.channelId == "amf-streaming" && CONNECTED_ONCE==false ) {
         Logger.info("Permanently disabling streaming support")
         STREAMING_AVAILABLE = false;
-        cookie.data.streaming_available = STREAMING_AVAILABLE;
-        cookie.flush();
+        this.setCookiePropery('streaming_available', STREAMING_AVAILABLE);
       }
       Logger.error("channelFault", String(event));
       connectionFailures += 1;
@@ -164,8 +168,6 @@ package org.ufsoft.baca {
         Logger.info("channelConnected - Connected", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
         connectionFailures = 0;
-        Logger.info("Load locale2");
-        locale.load(cookie.data.locale || 'pt_PT');
         if ( ! CONNECTED_ONCE ) {
           CONNECTED_ONCE = true;
         }
