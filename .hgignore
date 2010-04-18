@@ -10,3 +10,4 @@ tests/**
 syntax: regexp
 ^flex/generated(.*)
 ^python/baca/shared/Main.swf(.*)$
+^python/baca/locale/(.*)/LC_MESSAGES/messages.mo$

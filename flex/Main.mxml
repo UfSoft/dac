@@ -7,26 +7,30 @@
                 scriptRecursionLimit="1000"
                 scriptTimeLimit="60"
                 usePreloader="true"
-                pageTitle="Audio Convert"
+                pageTitle="Broadcast Audio Converter"
                 frameRate="16"
                 themeColor="haloBlue">
   <mx:Style source="assets/style.css" />
+  <mx:Script>
+    import org.ufsoft.baca.i18n.Locale;
+  </mx:Script>
   <reflexutil:ReflexUtil/>
 
   <mx:ApplicationControlBar width="100%">
     <mx:Image source="{rtpLogo}"/>
-    <mx:Label htmlText="Broadcast Audio Converter — Anywhere — for Rádio e Televisão de Portugal"
+    <mx:Label text="{resourceManager.getString('baca', 'Broadcast Audio Converter - Anywhere - for Rádio e Televisão de Portugal')}"
               styleName="applicationControlBarLabel"/>
     <mx:Spacer width="100%"/>
+    <components:LanguageComboBox id="languageComboBox"/>
     <components:ConnectionButton id="connButton"/>
   </mx:ApplicationControlBar>
 
   <mx:HDividedBox id="mainContent" width="100%" height="100%">
-    <components:UploadsPanel width="50%" height="100%" title="Uploads Queue"/>
+    <components:UploadsPanel width="50%" height="100%" title="{resourceManager.getString('baca', 'Uploads Queue')}"/>
     <components:ConvertQueuePanel width="50%" height="100%"/>
   </mx:HDividedBox>
   <mx:HBox width="100%">
     <mx:Spacer width="100%"/>
-    <mx:Text htmlText="© Pedro Algarvio" styleName="copyText"/>
+    <mx:Text text="© Pedro Algarvio" styleName="copyText"/>
   </mx:HBox>
 </app:DacApplication>

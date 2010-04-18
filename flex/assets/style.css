@@ -53,3 +53,13 @@ Panel {
   color: #ffffff;
 }
 
+ComboBox {
+  color: #000000;
+  textInputStyleName: comboBoxtextInputStyle;
+}
+
+.comboBoxtextInputStyle {
+  color: #ffffff;
+  fontWeight: bold;
+}
+

@@ -4,11 +4,12 @@
                               layout="vertical">
   <mx:Script>
   <![CDATA[
-
+    import org.ufsoft.baca.i18n.*;
   ]]>
   </mx:Script>
   <mx:VBox width="100%" id="fileContainer">
-    <mx:VBox id="fileUploadBox" maxHeight="250" width="100%" label="Files to Upload"/>
+    <mx:VBox id="fileUploadBox" maxHeight="250" width="100%"
+             label="{resourceManager.getString('baca', 'Files to Upload')}"/>
   </mx:VBox>
   <mx:ControlBar>
     <mx:VBox width="100%">
@@ -17,16 +18,20 @@
                paddingLeft="10" paddingRight="10"
                cornerRadius="5" borderStyle="solid" borderThickness="0">
         <mx:HBox id="uploadStats" width="100%" visible="false">
-          <mx:Text text="Total Files:" /><mx:Text id="totalFiles" />
-          <mx:Text text="Total Size:" /><mx:Text id="totalSize" />
+          <mx:Text text="{resourceManager.getString('baca', 'Total Files:')}" /><mx:Text id="totalFiles" />
+          <mx:Text text="{resourceManager.getString('baca', 'Total Size:')}" /><mx:Text id="totalSize" />
         </mx:HBox>
         <mx:ProgressBar id="totalProgressBar" width="100%" mode="manual" visible="false" />
       </mx:VBox>
       <mx:HBox>
-        <mx:Button id="browseButton" label="Add Files" width="100" icon="@Embed('/assets/add.png')" />
-        <mx:Button id="clearButton" label="Clear Files" visible="false" width="100"  icon="@Embed('/assets/eraser.png')"/>
-        <mx:Button id="uploadButton" label="Upload Files" visible="false" width="100" icon="@Embed('/assets/up.png')"/>
-        <mx:Button id="cancelButton" label="Cancel Upload" visible="false" width="100" icon="@Embed('/assets/remove.png')"/>
+        <mx:Button id="browseButton" label="{resourceManager.getString('baca', 'Add Files')}"
+                   icon="@Embed('/assets/add.png')" />
+        <mx:Button id="clearButton" label="{resourceManager.getString('baca', 'Clear Files')}"
+                   visible="false" icon="@Embed('/assets/eraser.png')"/>
+        <mx:Button id="uploadButton" label="{resourceManager.getString('baca', 'Upload Files')}"
+                   visible="false" icon="@Embed('/assets/up.png')"/>
+        <mx:Button id="cancelButton" label="{resourceManager.getString('baca', 'Cancel Upload')}"
+                   visible="false" icon="@Embed('/assets/remove.png')"/>
       </mx:HBox>
       <mx:Text id="mytext" />
     </mx:VBox>

@@ -10,13 +10,15 @@
     :license: BSD, see LICENSE for more details.
 """
 import gst
-import shutil
 import logging
 from ConfigParser import SafeConfigParser
-from os.path import abspath, basename, dirname, expanduser, isdir, join
 from types import ModuleType
 from os import makedirs, listdir, remove
-from os.path import basename, dirname, join, splitext
+from os.path import (abspath, basename, dirname, expanduser, join, isfile,
+                     isdir, splitext)
+
+from babel.core import Locale, UnknownLocaleError
+from babel.messages.mofile import read_mo
 
 from twisted.web import static, server, resource, vhost
 from twisted.internet import reactor
@@ -24,7 +26,7 @@ from twisted.internet.threads import deferToThread
 from twisted.internet.task import LoopingCall
 
 import amfast
-from amfast.remoting import Service, CallableTarget
+from amfast.remoting import Service, CallableTarget, ExtCallableTarget
 from amfast.remoting.twisted_channel import (TwistedChannelSet, TwistedChannel,
                                              StreamingTwistedChannel)
 
@@ -34,6 +36,17 @@ usefull_path = lambda path: abspath(expanduser(path))
 
 log = None
 
+LOCALES_DIR = join(dirname(__file__), 'locale')
+
+class Translation(object):
+    def __init__(self, msgid, msgstr):
+        self.msgid = msgid
+        self.msgstr = msgstr
+
+class Language(object):
+    def __init__(self, locale, display_name):
+        self.locale = locale
+        self.display_name = display_name
 
 class Conversion(object):
     def __init__(self, filename):
@@ -104,10 +117,13 @@ class Application(object):
         self.config = ModuleType('afm.config')
         self.config.file = 'baca.ini'
         self.config.parser = SafeConfigParser()
+        self.locales = {}
+        self.languages = []
         self.processing = False
         self.process_queue = []
         self.process_queue_listener_task = LoopingCall(self.check_process_queue)
         self.process_queue_listener_task.start(5, False)
+        self.setup_locales()
 
     def config_initial_populate(self):
         parser = self.config.parser
@@ -141,6 +157,31 @@ class Application(object):
         self.config.parser.remove_option('DEFAULT', 'here')
         self.config.parser.remove_section('DEFAULT')
         self.config.parser.write(open(join(config_dir, self.config.file), 'w'))
+
+    def setup_locales(self):
+        for locale in listdir(LOCALES_DIR):
+            locale_dir = join(LOCALES_DIR, locale)
+
+            if not isdir(locale_dir):
+                continue
+            try:
+                l = Locale.parse(locale)
+            except UnknownLocaleError:
+                continue
+
+            mo_file = join(LOCALES_DIR, locale, 'LC_MESSAGES', 'messages.mo')
+            if not isfile(mo_file):
+                continue
+
+            self.languages.append(Language(locale, l.display_name))
+            self.locales[locale] = []
+
+            catalog = read_mo(open(mo_file, 'rb'))
+            for msg in list(catalog)[1:]:
+                self.locales[locale].append(
+                    Translation(msg.id, msg.string and msg.string or msg.id)
+                )
+        self.languages.sort(key=lambda x: x.display_name.lower())
 
     def build_root(self):
         from amfast.encoder import Encoder
@@ -187,6 +228,12 @@ class Application(object):
         class_mapper.mapClass(DynamicClassDef(
             Conversion, 'org.ufsoft.baca.conversions.Conversion'
         ))
+        class_mapper.mapClass(DynamicClassDef(
+            Translation, 'org.ufsoft.baca.i18n.Translation'
+        ))
+        class_mapper.mapClass(DynamicClassDef(
+            Language, 'org.ufsoft.baca.i18n.Language'
+        ))
 
         # Set Channel options
         # We're going to use the same
@@ -206,6 +253,10 @@ class Application(object):
         rpc_service = Service('WebServices')
         rpc_service.mapTarget(CallableTarget(cont_obj.get_process_queue,
                                              'get_process_queue'))
+        rpc_service.mapTarget(ExtCallableTarget(cont_obj.get_languages,
+                                                'get_languages'))
+        rpc_service.mapTarget(ExtCallableTarget(cont_obj.get_translations,
+                                                'get_translations'))
         channel_set.service_mapper.mapService(rpc_service)     # Setup channels
 
         root.putChild('amf-streaming', amf_streaming)

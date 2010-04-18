@@ -1,0 +1,73 @@
+# English translations for BACA.
+# Copyright (C) 2010 UfSoft.org
+# This file is distributed under the same license as the BACA project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BACA 0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2010-04-18 18:23+0100\n"
+"PO-Revision-Date: 2010-04-17 19:25+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.0dev-r0\n"
+
+#: flex/Main.mxml:22 flex/generated/Main-generated.as:315
+#: flex/generated/Main-generated.as:350
+msgid "Broadcast Audio Converter - Anywhere - for Rádio e Televisão de Portugal"
+msgstr ""
+
+#: flex/Main.mxml:28 flex/generated/Main-generated.as:329
+#: flex/generated/Main-generated.as:352
+msgid "Uploads Queue"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:35
+msgid "Connected"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:38
+msgid "Disconnected"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:41
+msgid "Connecting"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/ConvertQueuePanel.mxml:93
+msgid "Conversion Queue"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:12
+msgid "Files to Upload"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:21
+msgid "Total Files:"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:22
+msgid "Total Size:"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:28
+msgid "Add Files"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:30
+msgid "Clear Files"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:32
+msgid "Upload Files"
+msgstr ""
+
+#: flex/org/ufsoft/baca/components/UploadsPanel.mxml:34
+msgid "Cancel Upload"
+msgstr ""
+

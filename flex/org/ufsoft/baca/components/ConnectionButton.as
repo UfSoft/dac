@@ -8,7 +8,9 @@ package org.ufsoft.baca.components {
   import mx.core.Application;
   import mx.controls.Button;
   import mx.messaging.ChannelSet;
+  import mx.resources.ResourceManager;
   import org.ufsoft.baca.events.ConnectionEvent;
+  import org.ufsoft.baca.i18n.Locale;
 
   public class ConnectionButton extends Button {
     [Bindable]
@@ -31,13 +33,13 @@ package org.ufsoft.baca.components {
       Logger.debug("ConnectionButton.as catched event");
       if ( event.type == ConnectionEvent.CONNECTED ) {
         setStyle("icon", connectionUp);
-        this.toolTip = "Connected";
+        this.toolTip = ResourceManager.getInstance().getString('baca', "Connected");
       } else if ( event.type == ConnectionEvent.DISCONNECTED ) {
         setStyle("icon", connectionDown);
-        this.toolTip = "Disconnected";
+        this.toolTip = ResourceManager.getInstance().getString('baca', "Disconnected");
       } else {
         setStyle("icon", connectionConnecting);
-        this.toolTip = "Connecting";
+        this.toolTip = ResourceManager.getInstance().getString('baca', "Connecting");
       }
     }
   }

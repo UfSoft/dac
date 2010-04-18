@@ -11,6 +11,7 @@ package org.ufsoft.baca {
   import flash.utils.setTimeout;
   import mx.collections.ArrayCollection;
   import mx.collections.ItemResponder;
+  import mx.controls.ComboBox;
   import mx.events.FlexEvent;
   import mx.messaging.Consumer;
   import mx.messaging.ChannelSet;
@@ -28,6 +29,7 @@ package org.ufsoft.baca {
 
   import org.ufsoft.baca.conversions.Conversion;
   import org.ufsoft.baca.events.*;
+  import org.ufsoft.baca.i18n.*;
 
   public class DacApplication extends Application {
 
@@ -51,6 +53,11 @@ package org.ufsoft.baca {
     private var connectionFailures:           Number = 0;
 
     private var cookie:                       SharedObject;
+    private var locale:                       Locale;
+    private var STREAMING_AVAILABLE:          Boolean;
+    private var CONNECTED_ONCE:               Boolean=false;
+
+    public var languagesComboBox:             ComboBox;
 
     [Bindable]
     [Embed('/assets/rtp.png')] public var rtpLogo:Class;
@@ -69,16 +76,30 @@ package org.ufsoft.baca {
       serverLongPollingUrl = '/amf-long-polling';
 
       addEventListener(FlexEvent.CREATION_COMPLETE, applicationCreated);
+      addEventListener(FlexEvent.INITIALIZE, setupInitialLocale);
       // Disable Logging
       //Logger.hide = true;
 
       // Cookies!!!
       cookie = SharedObject.getLocal("BroadcastAudioConverterAnywhere");
+      STREAMING_AVAILABLE = cookie.data.streaming_available || true;
+      locale = Locale.getInstance();
+      locale.load(cookie.data.locale || 'pt_PT');
+    }
+
+    private function translationLoaded(event:TranslationEvent):void {
+      Logger.info("Translation Loaded. Storing locale in cookie");
+      cookie.data.locale = Locale.getInstance().getLocale();
+      cookie.flush();
+    }
+
+    private function setupInitialLocale(event:FlexEvent):void {
     }
 
     private function applicationCreated(event:Event):void {
       Logger.info("Application Created", cookie.data);
       Logger.info("Dispatching ApplicationEvent.RUNNING");
+
       this.dispatchEvent(new ApplicationEvent(ApplicationEvent.RUNNING));
     }
 
@@ -91,7 +112,7 @@ package org.ufsoft.baca {
       // Create a channel set and add channel(s) to it
       appChannelSet = new ChannelSet();
 
-      if ( (cookie.data.no_streaming_support || false) == false ) {
+      if ( STREAMING_AVAILABLE ) {
         Logger.info("Streaming available. Adding streaming channel");
         streamingChannel = new StreamingAMFChannel("amf-streaming",
                                                   serverStreamingUrl);
@@ -120,9 +141,10 @@ package org.ufsoft.baca {
     }
 
     private function channelFault(event:ChannelFaultEvent):void {
-      if ( event.channelId == "amf-streaming" ) {
+      if ( event.channelId == "amf-streaming" && !CONNECTED_ONCE ) {
         Logger.info("Permanently disabling streaming support")
-        cookie.data.no_streaming_support = true;
+        STREAMING_AVAILABLE = false;
+        cookie.data.streaming_available = STREAMING_AVAILABLE;
         cookie.flush();
       }
       Logger.error("channelFault", String(event));
@@ -142,6 +164,11 @@ package org.ufsoft.baca {
         Logger.info("channelConnected - Connected", String(event));
         this.dispatchEvent(new ConnectionEvent(ConnectionEvent.CONNECTED));
         connectionFailures = 0;
+        Logger.info("Load locale2");
+        locale.load(cookie.data.locale || 'pt_PT');
+        if ( ! CONNECTED_ONCE ) {
+          CONNECTED_ONCE = true;
+        }
       }
     }
 
@@ -184,14 +211,18 @@ package org.ufsoft.baca {
       return consumer;
     }
 
-    public function queryQueueContents():void {
+    public function getRemoteService():RemoteObject {
       if ( remoteService == null) {
         remoteService = new RemoteObject("WebServices");
         remoteService.channelSet = getChannel();
         remoteService.showBusyCursor = true;
         remoteService.addEventListener(FaultEvent.FAULT, remoteServiceFault);
       }
-      var token:AsyncToken = remoteService.get_process_queue();
+      return remoteService;
+    }
+
+    public function queryQueueContents():void {
+      var token:AsyncToken = getRemoteService().get_process_queue();
       token.addResponder(new ItemResponder(queryQueueContentsResult,
                                            queryQueueContentsFault,
                                            token));

@@ -9,7 +9,6 @@ package org.ufsoft.baca.components.uploads
   import mx.events.FlexEvent;
   import mx.core.ScrollPolicy;
   import mx.core.BitmapAsset;
-  import ru.inspirit.net.MultipartURLLoader;
 
 
   public class FileUpload extends VBox
