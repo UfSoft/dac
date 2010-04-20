@@ -34,9 +34,7 @@ setup(name=baca.__package__,
         ],
         'flex': [
             ('**.as', 'baca.utils.extract:extract_actionscript', None),
-            ('**.mxml', 'baca.utils.extract:extract_mxml', {
-                'attrs': [
-                    u'label', u'text', u'title', u'headerText', u'prompt']}),
+            ('**.mxml', 'baca.utils.extract:extract_mxml', None)
         ]
       },
       entry_points = """

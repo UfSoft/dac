@@ -87,6 +87,8 @@ class MXMLParser(object):
         return (-1, -1)
 
 def extract_mxml(fileobj, keywords, comment_tags, options):
+    attrs = set(options.get('attrs', [])).union(
+                set([u'label', u'text', u'title', u'headerText', u'prompt']))
     encoding = options.get('encoding', 'utf-8')
 
     for elem, pos in MXMLParser(fileobj).parse():
@@ -97,7 +99,7 @@ def extract_mxml(fileobj, keywords, comment_tags, options):
                 yield pos[0]+lineno, funcname, message, comments
         else:
             attrib = None
-            for attr in options.get('attrs', []):
+            for attr in attrs:
                 if elem.get(attr):
                     attrib = attr
             if attrib:
@@ -106,5 +108,4 @@ def extract_mxml(fileobj, keywords, comment_tags, options):
                     contents = elem.attrib[attrib][1:-1].encode(encoding)
                     for _, funcname, message, comments in extract_actionscript(
                           StringIO(contents), keywords, comment_tags, options):
-                        print 111, pos[0], funcname, message, comments
                         yield pos[0], funcname, message, comments

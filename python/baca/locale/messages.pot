@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BACA 0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2010-04-18 18:23+0100\n"
+"POT-Creation-Date: 2010-04-20 12:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,29 +17,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.0dev-r0\n"
 
-#: flex/Main.mxml:22 flex/generated/Main-generated.as:315
-#: flex/generated/Main-generated.as:350
+#: flex/Main.mxml:22
 msgid "Broadcast Audio Converter - Anywhere - for Rádio e Televisão de Portugal"
 msgstr ""
 
-#: flex/Main.mxml:28 flex/generated/Main-generated.as:329
-#: flex/generated/Main-generated.as:352
+#: flex/Main.mxml:29
 msgid "Uploads Queue"
 msgstr ""
 
-#: flex/org/ufsoft/baca/components/ConnectionButton.as:35
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:36
 msgid "Connected"
 msgstr ""
 
-#: flex/org/ufsoft/baca/components/ConnectionButton.as:38
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:39
 msgid "Disconnected"
 msgstr ""
 
-#: flex/org/ufsoft/baca/components/ConnectionButton.as:41
+#: flex/org/ufsoft/baca/components/ConnectionButton.as:42
 msgid "Connecting"
 msgstr ""
 
-#: flex/org/ufsoft/baca/components/ConvertQueuePanel.mxml:93
+#: flex/org/ufsoft/baca/components/ConvertQueuePanel.mxml:94
 msgid "Conversion Queue"
 msgstr ""
 

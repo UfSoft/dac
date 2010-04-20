@@ -14,7 +14,7 @@
         <mxmlc file="${APP_ROOT}/flex/Main.mxml"
                output="${DEPLOY_DIR}/Main.swf"
                actionscript-file-encoding="UTF-8"
-               keep-generated-actionscript="true"
+               keep-generated-actionscript="false"
                incremental="true"
                target-player="${swf.version}">
             <load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
