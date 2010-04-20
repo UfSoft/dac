@@ -11,9 +11,6 @@
                 frameRate="16"
                 themeColor="haloBlue">
   <mx:Style source="assets/style.css" />
-  <mx:Script>
-    import org.ufsoft.baca.i18n.Locale;
-  </mx:Script>
   <reflexutil:ReflexUtil/>
 
   <mx:ApplicationControlBar width="100%">
