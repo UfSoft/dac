@@ -23,6 +23,7 @@
               <include name="FlexSpy.swc"/>
               <include name="ReflexUtil3.swc"/>
             </compiler.library-path>
+            <compiler.keep-as3-metadata>Style</compiler.keep-as3-metadata>
         </mxmlc>
     </target>
   <target name="wrapper">
