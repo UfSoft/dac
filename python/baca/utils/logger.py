@@ -16,8 +16,8 @@ from twisted.internet import defer
 LoggingLoggerClass = logging.getLoggerClass()
 
 class Logging(LoggingLoggerClass):
-    def __init__(self, logger_name='baca', level=logging.DEBUG):
-        LoggingLoggerClass.__init__(self, logger_name, level)
+    def __init__(self, logger_name):
+        LoggingLoggerClass.__init__(self, logger_name)
 
     @defer.inlineCallbacks
     def debug(self, msg, *args, **kwargs):
