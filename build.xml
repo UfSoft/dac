@@ -22,6 +22,7 @@
             <compiler.library-path dir="${APP_ROOT}/flex/lib" append="true">
               <include name="FlexSpy.swc"/>
               <include name="ReflexUtil3.swc"/>
+              <include name="ThunderBolt.swc"/>
             </compiler.library-path>
             <compiler.keep-as3-metadata>Style</compiler.keep-as3-metadata>
         </mxmlc>
